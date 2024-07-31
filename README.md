@@ -4,6 +4,7 @@
 ## What?
 - A YAML-based query language focused on readability
 - Compiles to 100% valid SQL & JSON
+- [100% open-source](/LICENSE)
 - A thin layer on top of the amazing [PRQL](https://github.com/PRQL/prql) project
 
 ## Priorities
