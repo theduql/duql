@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUQL - Dangerously Usable Query Language | Alternative to SQL</title>
+    <meta name="description" content="DUQL: Dangerously Usable Query Language. A modern, user-friendly alternative to traditional query languages like SQL. Simplify your data queries with DUQL.">
+    <meta name="keywords" content="DUQL, query language, SQL alternative, database query, data manipulation, easy-to-use query language">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --background: #F5F5F5;
+            --surface: #E0E0E0;
+            --primary: #FFD100;
+            --secondary: #00A5A5;
+            --accent: #FF7F00;
+            --text: #1A2B3C;
+            --soft-blue: #4A90E2;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--background);
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+        }
+
+        .container {
+            text-align: center;
+            z-index: 1;
+        }
+
+        .logo-container {
+            width: 60vw;
+            height: 60vw;
+            max-width: 600px;
+            max-height: 600px;
+            margin: 0 auto 40px;
+            transform-style: preserve-3d;
+            transition: transform 0.2s ease;
+        }
+
+        .logo {
+            width: 100%;
+            height: 100%;
+            background: url('https://tyler-mills-shared.s3.amazonaws.com/duql-logo.png') no-repeat center;
+            background-size: contain;
+            filter: drop-shadow(0 10px 20px rgba(26, 43, 60, 0.2));
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.7rem;
+            font-weight: 600;
+            color: var(--secondary);
+            letter-spacing: 1px;
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+
+        .github-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            background-color: var(--accent);
+            color: var(--background);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(26, 43, 60, 0.1);
+        }
+
+        .github-button:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 165, 165, 0.4);
+        }
+
+        .github-button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 165, 165, 0.4);
+        }
+
+        .github-button::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="%23F5F5F5"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>') no-repeat center;
+            background-size: contain;
+        }
+
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+            background: linear-gradient(-45deg, var(--primary), var(--secondary), var(--soft-blue));
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+    <div class="container">
+        <div class="logo-container">
+            <div class="logo"></div>
+        </div>
+        <h1>DUQL</h1>
+        <h2>DANGEROUSLY USABLE QUERY LANGUAGE</h2>
+        <a href="https://github.com/assembledstudio/duql" class="github-button">View on GitHub</a>
+    </div>
+
+    <script>
+        const logoContainer = document.querySelector('.logo-container');
+
+        document.addEventListener('mousemove', (e) => {
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 50;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 50;
+            logoContainer.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        });
+
+        document.addEventListener('mouseleave', () => {
+            logoContainer.style.transition = 'transform 0.5s ease';
+            logoContainer.style.transform = 'rotateY(0deg) rotateX(0deg)';
+        });
+    </script>
+</body>
+</html>

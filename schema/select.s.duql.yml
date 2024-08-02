@@ -1,0 +1,73 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://duql.dev/schema/select.s.duql.yml
+title: DUQL Select Function
+description: |
+  The select function in DUQL is used to specify which columns to include in the output.
+  It can be used to choose existing columns, rename columns, compute new columns,
+  or select all columns dataset a specific table. The select! variant is used to exclude specified columns.
+type: object
+properties:
+  select:
+    oneOf:
+      - type: array
+        items:
+          type: string
+        description: List of column names to include.
+      - type: object
+        additionalProperties:
+          type: string
+        description: Object mapping new column names to expressions.
+  select!:
+    type: array
+    items:
+      type: string
+    description: List of column names to exclude.
+oneOf:
+  - required: [select]
+  - required: [select!]
+
+examples:
+  - select: [id, name, email]
+
+  - select:
+      Customer ID: customer_id
+      Full Name: f"{first_name} {last_name}"
+      Total Spent: sum(order_total)
+
+  - select: employees.*
+
+  - select!: [password, credit_card_number]
+
+  - select:
+      - order_id
+      - customer_name
+      - order_date
+      - Total: price * quantity
+
+  - select:
+      BMI: weight / (height / 100) ^ 2
+      Weight Status:
+        case:
+          - BMI < 18.5: "Underweight"
+          - BMI < 25: "Normal"
+          - BMI < 30: "Overweight"
+          - true: "Obese"
+
+  - select:
+      - products.*
+      - inventory.quantity_on_hand
+
+  - select:
+      User ID: id
+      Username: username
+      Last Login: 
+        s: "DATE_FORMAT(last_login, '%Y-%m-%d %H:%i:%s')"
+
+  - select:
+      - category
+      - product_name
+      - Sales: sum(quantity * price)
+      - "% of Total Sales": 
+          s: "SUM(quantity * price) / SUM(SUM(quantity * price)) OVER () * 100"
+
+  - select!: [created_at, updated_at, deleted_at]

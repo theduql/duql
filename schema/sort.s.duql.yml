@@ -1,0 +1,66 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://duql.dev/schema/sort.s.duql.yml
+title: DUQL Sort Function
+description: |
+  The sort function in DUQL is used to specify the order of rows in the output.
+  It supports sorting by multiple columns, in ascending or descending order,
+  and can use complex expressions for sorting criteria.
+type: object
+properties:
+  sort:
+    oneOf:
+      - type: string
+      - type: array
+        items:
+          type: string
+      - type: object
+        additionalProperties:
+          type: string
+    description: |
+      Specifies the sorting criteria. Can be a single column name, an array of column names,
+      or an object for more complex sorting. Use '-' prefix for descending order.
+required: [sort]
+
+examples:
+  - sort: last_name
+
+  - sort: -age
+
+  - sort: [department, -salary]
+
+  - sort:
+      - last_name
+      - first_name
+      - -hire_date
+
+  - sort:
+      Order Date: order_date
+      "Total Amount": -order_total
+
+  - sort:
+      - category
+      - -sum(sales_amount)
+
+  - sort:
+      s: "CASE WHEN status = 'urgent' THEN 0 ELSE 1 END, created_at DESC"
+
+  - sort:
+      - country
+      - -state
+      - city
+      - street_name
+      - house_number
+
+  - sort:
+      - year(date)
+      - -quarter(date)
+      - month(date)
+
+  - sort:
+      Priority:
+        case:
+          - status == 'critical': 1
+          - status == 'high': 2
+          - status == 'medium': 3
+          - true: 4
+      "Created Date": created_at

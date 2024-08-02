@@ -1,0 +1,26 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://example.com/steps.s.duql.yml
+title: DUQL Steps
+description: |
+  Defines the sequence of operations to be performed on the data in a DUQL query.
+  Each step represents a transformation or action applied to the dataset.
+  Steps are executed in the order they appear in the array.
+type: array
+items:
+  type: object
+  oneOf:
+    - $ref: 'filter.s.duql.yml'
+    - $ref: 'generate.s.duql.yml'
+    - $ref: 'group.s.duql.yml'
+    - $ref: 'join.s.duql.yml'
+    - $ref: 'select.s.duql.yml'
+    - $ref: 'sort.s.duql.yml'
+    - $ref: 'take.s.duql.yml'
+    - $ref: 'window.s.duql.yml'
+    - $ref: 'append.s.duql.yml'
+    - $ref: 'remove.s.duql.yml'
+    - $ref: 'intersect.s.duql.yml'
+    - $ref: 'distinct.s.duql.yml'
+    - $ref: 'union.s.duql.yml'
+    - $ref: 'except.s.duql.yml'
+    - $ref: 'loop.s.duql.yml'

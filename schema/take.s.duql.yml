@@ -1,0 +1,39 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://duql.dev/schema/take.s.duql.yml
+title: DUQL Take Function
+description: |
+  The take function in DUQL is used to limit the number of rows returned or to select
+  specific ranges of rows. It can be used for pagination, sampling, or selecting top/bottom N rows.
+type: object
+properties:
+  take:
+    oneOf:
+      - type: integer
+        minimum: 0
+      - type: string
+        pattern: ^(\d+\.\.(\d+)?|\.\.\d+)$
+    description: |
+      Specifies the number of rows to take or a range of rows.
+      Can be a positive integer or a range in the form of 'start..end', 'start..', or '..end'.
+required: [take]
+
+examples:
+  - take: 10
+
+  - take: 0
+
+  - take: '5..10'
+
+  - take: '100..'
+
+  - take: '..50'
+
+  - take: 1
+
+  - take: '10..20'
+
+  - take: '..100'
+
+  - take: '1000..'
+
+  - take: '5..15'
