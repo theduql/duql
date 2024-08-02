@@ -9,8 +9,7 @@ properties:
   join:
     type: object
     properties:
-      dataset:
-        $ref: 'dataset.s.duql.yml'
+      $ref: 'dataset.s.duql.yml'
       where:
         type: string
         description: The join condition. Can use '==' shorthand for equality joins on matching column names.
