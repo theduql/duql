@@ -1,5 +1,3 @@
-Certainly! I'll create comprehensive documentation for the DUQL Window Function based on the provided schema. Here's the markdown documentation:
-
 # DUQL Window Function
 
 The window function in DUQL is a powerful tool for performing calculations across a set of rows that are related to the current row. It allows for complex analytics and comparisons within specified ranges or groups of data.
