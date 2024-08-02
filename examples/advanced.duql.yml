@@ -1,0 +1,92 @@
+
+
+duql: # optional, default target = generic, if present must always come first
+  version: '0.0.1'
+  target: sql.postgres 
+declare: # optional variable declarations, when translated to PRQL each key becomes an individual let declaration, if present must always come before from and after duql (if duql exists)
+  x: foo # x is an alias of column foo
+  tuple_example: {column_a, column_b: field_b} # a tuple
+  interop: low:0 high x -> (x - low) / (high - low) # a function declaration
+  average: column -> s"AVG({column})" # a function declaration that leverages SQL
+  my_artists: [ # an array
+    artist: Miles Davis,
+    artist: Marvin Gaye,
+    artist: James Brown
+  ] 
+  grouping: s"""SELECT SUM(a) FROM tbl GROUP BY GROUPING SETS ((b, c, d), (d), (b, d))""""
+dataset: l = logs # Altnerate forms - from: logs, from: read_csv asdf.csv
+steps: # Pipeline steps to execute in sequentially. The outopt of each step is a table.
+  - append: employees # a table to append
+  - remove: employees # a table to remove
+  - intersect:  investors # a table to intersect
+  - filter: id == $1 # filtering based on simple boolean expression and a placeholder variable
+  - filter: (created_at | in @1776-07-04..@1787-09-17) # filtering based on a pipeline expression (pipeline expressions require parentheses)
+  - filter: (magnitude | in 50..100) # filtering based on a pipeline expression
+  - generate: # every key is a user-defined column that is added to the table, where the contents of the column are the output of the provided expression
+      is_northern: (latitude | in 0..)  # this creates a new column named is_northern, but it could be whatever the user wants. Value can also be null. 
+      should_have_shipped_today: order_time < @08:30 #
+      first_prql_commit: '@2020-01-01T13:19:55-08:00'
+      distance: # A fiield named distance by the user.
+        case: # Search for the first condition that evaluates to true and return its associated value. If none of the conditions match, null is returned.
+          - city == "Calgary":  0
+          - city == "Edmonton": 300
+          - true : "Unkown"
+  - group: 
+      by: [title, country] # Partitions rows from the table into groups, applies a pipeline to each of the groups.
+      summarize: 
+        salary: average salary,
+        ct: count salary
+      take: 1000 # Picks rows based on their position. Either an integer or a range in form of 1..10
+  - summarize: # Summarizes many rows into one row. without group, it produces one row from the whole table. Within a group pipeline, it produces one row from each group.
+      num_orders: count this #num_orders here ends up being a column on the table
+      sum_of_orders: sum num_orders #sum_of_orders here ends up being a column on the table
+  - group: # Partitions rows from the table into groups, applies a pipeline to each of the groups.
+      by: billing_city # Required, string if single group, array if multiple groups.
+      take: 3 # Picks rows based on their position. Either an integer or a range in form of 1..10 
+  - join: 
+      from: tracks # table name of other table, can be referred to with `that.` in expression
+      where: ==track.column # expression, you can use shorthand =={{table}}.{{column}} if the column names match
+  - join: 
+      from: customers # table name of other table, can be referred to with `that.` in expression
+      where: invoices.customer_id == customers.customer_id # expression. Referred to as 'condition' in PRQL (but not labeled in language)
+      retain: inner # optional for joins, default is inner. only allowed values are: inner, left, right, full. Known as 'side' in PRQL.
+  - join:
+      from: albums.csv
+      where: ==track_id
+      retain: inner
+  - group:
+      by: employees.* #table employees and all columns
+      take: 1
+  - loop: # Iteratively applies step function to initial relation until the step returns an empty table. 
+      table: this # table is required
+      filter: status == error # any function can be here, not just filter
+  - window: # Applies a pipeline to segments of rows, producing one output value for every input value.
+      rows: -2..0                             # key must be one of: rows, range, expanding, rolling; expanding:true is an alias for rows:..0. A sum using this window is also known as “cumulative sum”. rolling:n is an alias for rows:(-n+1)..0, where n is an integer. This will include n last values, including current row. An average using this window is also knows as a Simple Moving Average.
+      sort:  time_id
+      generate: 
+        sma3rows: average value
+  - window:
+      range: -2..0                             # key must be one of: rows, range, expanding, rolling; expanding:true is an alias for rows:..0. A sum using this window is also known as “cumulative sum”. rolling:n is an alias for rows:(-n+1)..0, where n is an integer. This will include n last values, including current row. An average using this window is also knows as a Simple Moving Average.
+      sort: time_id
+      generate: 
+        sma3range: average value
+  - group:
+      by: order_month
+      sort: day
+      window:
+        expanding: true
+        generate: 
+          monthly_running_total: sum value
+  - select:  # Picks (and optionally computes) columns. Each key is the name of the column returned and the 
+      - Status: status # simple expression, in this case
+      - Message: (small = big | foo 3 | bar 'hello' 'world' | baz) # expression
+      - Cost: cost # expression
+      - Full Name: f"{first_name} {last_name}" # expression
+  - select: [foo, bar, baz] # select many
+  - select!: [foo] # select! is 'select everything except'
+  - select: artists.* # select all the table
+  - sort: [age, -tenure, +salary] 
+  - sort: -age
+  - take: 3..10 # 
+  - take: 1
+into: employee_query # the same as 'declare' assignment (or 'let' in PRQL) but it happens at the end
