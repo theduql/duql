@@ -1,5 +1,3 @@
-You're right, and I apologize for the oversight. The schema you've provided does indeed change the approach. Let me revise the documentation for the `join` function based on this schema:
-
 # DUQL Join
 
 The `join` function in DUQL is used to combine rows from two or more tables based on a related column between them. It supports different types of joins and allows for complex join conditions.
@@ -73,8 +71,8 @@ join:
 join:
   dataset: recent_inventory
   steps:
-    - dataset: inventory
-    - filter: last_updated > @2023-01-01
+  - dataset: inventory
+  - filter: last_updated > @2023-01-01
   where: products.product_id == recent_inventory.product_id
   retain: full
 ```
@@ -85,13 +83,13 @@ join:
 join:
   dataset: customer_views
   steps:
-    - dataset: product_views
-    - filter: view_date >= @2023-01-01
-    - group:
-        by: [customer_id]
-        summarize:
-          total_views: count this
-          unique_products_viewed: count_distinct product_id
+  - dataset: product_views
+  - filter: view_date >= @2023-01-01
+  - group:
+      by: [customer_id]
+      summarize:
+        total_views: count this
+        unique_products_viewed: count_distinct product_id
   where: customers.id == customer_views.customer_id
 ```
 
@@ -131,49 +129,49 @@ Here's an example of a DUQL query that uses multiple joins to create a comprehen
 dataset: orders
 
 steps:
-  - filter: order_date >= @2023-01-01
-  - join:
-      dataset: customers
-      where: orders.customer_id == customers.id
-  - join:
-      dataset: products
-      where: orders.product_id == products.id
-  - join:
-      dataset: inventory
-      steps:
-        - group:
-            by: product_id
-            summarize:
-              current_stock: sum(quantity)
-      where: products.id == inventory.product_id
-  - generate:
-      total_amount: orders.quantity * products.price
-  - group:
-      by: [products.category, products.id, products.name]
-      summarize:
-        total_sales: sum(total_amount)
-        units_sold: sum(orders.quantity)
-        unique_customers: count_distinct(customer_id)
-  - join:
-      dataset: | 
-        sql' SELECT category, AVG(total_sales) as avg_category_sales
-        FROM (
-          SELECT products.category, SUM(orders.quantity * products.price) as total_sales
-          FROM orders
-          JOIN products ON orders.product_id = products.id
-          WHERE orders.order_date >= '2023-01-01'
-          GROUP BY products.category, products.id
-        ) category_sales
-        GROUP BY category'
-      where: ==category
-  - generate:
-      performance_ratio: total_sales / avg_category_sales
-      stock_status:
-        case:
-          - current_stock == 0: "Out of Stock"
-          - current_stock < 10: "Low Stock"
-          - true: "In Stock"
-  - sort: [category, -total_sales]
+- filter: order_date >= @2023-01-01
+- join:
+    dataset: customers
+    where: orders.customer_id == customers.id
+- join:
+    dataset: products
+    where: orders.product_id == products.id
+- join:
+    dataset: inventory
+    steps:
+    - group:
+        by: product_id
+        summarize:
+          current_stock: sum(quantity)
+    where: products.id == inventory.product_id
+- generate:
+    total_amount: orders.quantity * products.price
+- group:
+    by: [products.category, products.id, products.name]
+    summarize:
+      total_sales: sum(total_amount)
+      units_sold: sum(orders.quantity)
+      unique_customers: count_distinct(customer_id)
+- join:
+    dataset: | 
+      sql' SELECT category, AVG(total_sales) as avg_category_sales
+      FROM (
+        SELECT products.category, SUM(orders.quantity * products.price) as total_sales
+        FROM orders
+        JOIN products ON orders.product_id = products.id
+        WHERE orders.order_date >= '2023-01-01'
+        GROUP BY products.category, products.id
+      ) category_sales
+      GROUP BY category'
+    where: ==category
+- generate:
+    performance_ratio: total_sales / avg_category_sales
+    stock_status:
+      case:
+      - current_stock == 0: "Out of Stock"
+      - current_stock < 10: "Low Stock"
+      - true: "In Stock"
+- sort: [category, -total_sales]
 
 into: product_sales_report
 ```

@@ -1,5 +1,3 @@
-Certainly! I'll create comprehensive documentation for the DUQL `steps` component, emphasizing its flexibility and pipeline-like nature for data transformation. Here's the documentation:
-
 # DUQL Steps
 
 The `steps` component in DUQL represents a series of data transformation operations applied sequentially to your dataset. It's the heart of DUQL's query structure, providing a flexible and intuitive way to express complex data manipulations as a pipeline of operations.
@@ -8,10 +6,10 @@ The `steps` component in DUQL represents a series of data transformation operati
 
 ```yaml
 steps:
-  - <step_1>
-  - <step_2>
-  - <step_3>
-  # ... more steps as needed
+- <step_1>
+- <step_2>
+- <step_3>
+# ... more steps as needed
 ```
 
 ## Behavior
@@ -58,43 +56,43 @@ The `steps` pipeline in DUQL offers several advantages:
 
 ```yaml
 steps:
-  - filter: order_date >= @2023-01-01
-  - generate:
-      total_amount: price * quantity
-  - group:
-      by: product_id
-      summarize:
-        total_sales: sum(total_amount)
-  - sort: -total_sales
-  - take: 10
+- filter: order_date >= @2023-01-01
+- generate:
+    total_amount: price * quantity
+- group:
+    by: product_id
+    summarize:
+      total_sales: sum(total_amount)
+- sort: -total_sales
+- take: 10
 ```
 
 ### Complex Data Transformation
 
 ```yaml
 steps:
-  - filter: status == 'active'
-  - join:
-      dataset: customer_details
-      where: orders.customer_id == customer_details.id
-  - generate:
-      age: datediff(years, birth_date, current_date())
-      customer_segment:
-        case:
-          - age < 25: "Young Adult"
-          - age < 40: "Adult"
-          - age < 60: "Middle Age"
-          - true: "Senior"
-  - group:
-      by: [customer_segment, product_category]
-      summarize:
-        total_revenue: sum(price * quantity)
-        average_order_value: avg(price * quantity)
-  - sort: [customer_segment, -total_revenue]
-  - generate:
-      revenue_rank:
-        sql'ROW_NUMBER() OVER (PARTITION BY customer_segment ORDER BY total_revenue DESC)'
-  - filter: revenue_rank <= 5
+- filter: status == 'active'
+- join:
+    dataset: customer_details
+    where: orders.customer_id == customer_details.id
+- generate:
+    age: datediff(years, birth_date, current_date())
+    customer_segment:
+      case:
+      - age < 25: "Young Adult"
+      - age < 40: "Adult"
+      - age < 60: "Middle Age"
+      - true: "Senior"
+- group:
+    by: [customer_segment, product_category]
+    summarize:
+      total_revenue: sum(price * quantity)
+      average_order_value: avg(price * quantity)
+- sort: [customer_segment, -total_revenue]
+- generate:
+    revenue_rank:
+      sql'ROW_NUMBER() OVER (PARTITION BY customer_segment ORDER BY total_revenue DESC)'
+- filter: revenue_rank <= 5
 ```
 
 ## Best Practices
@@ -115,33 +113,33 @@ Here's an example of a DUQL query that uses a complex `steps` pipeline to perfor
 dataset: user_actions
 
 steps:
-  - filter: action_date >= @2023-01-01
-  - generate:
-      cohort_date: date_trunc('month', first_action_date)
-      months_since_first_action: datediff(months, cohort_date, action_date)
-  - group:
-      by: [cohort_date, months_since_first_action]
-      summarize:
-        user_count: count_distinct(user_id)
-        total_actions: count(action_id)
-  - join:
-      dataset: 
-        steps:
-          - dataset: user_actions
-          - group:
-              by: cohort_date
-              summarize:
-                initial_users: count_distinct(user_id)
-      where: ==cohort_date
-  - generate:
-      retention_rate: user_count / initial_users
-  - sort: [cohort_date, months_since_first_action]
-  - select:
-      Cohort: cohort_date
-      "Months Since First Action": months_since_first_action
-      "User Count": user_count
-      "Retention Rate": retention_rate
-  - filter: months_since_first_action <= 12
+- filter: action_date >= @2023-01-01
+- generate:
+    cohort_date: date_trunc('month', first_action_date)
+    months_since_first_action: datediff(months, cohort_date, action_date)
+- group:
+    by: [cohort_date, months_since_first_action]
+    summarize:
+      user_count: count_distinct(user_id)
+      total_actions: count(action_id)
+- join:
+    dataset: 
+      steps:
+      - dataset: user_actions
+      - group:
+          by: cohort_date
+          summarize:
+            initial_users: count_distinct(user_id)
+    where: ==cohort_date
+- generate:
+    retention_rate: user_count / initial_users
+- sort: [cohort_date, months_since_first_action]
+- select:
+    Cohort: cohort_date
+    "Months Since First Action": months_since_first_action
+    "User Count": user_count
+    "Retention Rate": retention_rate
+- filter: months_since_first_action <= 12
 
 into: user_cohort_analysis
 ```

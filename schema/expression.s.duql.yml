@@ -1,111 +1,96 @@
 $schema: https://json-schema.org/draft/2020-12/schema
 $id: https://duql.dev/schema/expression.s.duql.yml
 title: DUQL Expression
-description: Boolean expressions using PRQL-supported functions (non-pipeline related).
-type: string
+description: |
+  Defines expressions in DUQL, including inline expressions, SQL statements, case statements, and pipelines.
+  Expressions can be used in various contexts such as filtering, generating new columns, and defining conditions.
+oneOf:
+  - type: string
+    title: Inline Expression
+    description: An inline boolean expression using DUQL syntax, which may include pipeline notation.
+  - type: object
+    title: SQL Statement
+    properties:
+      sql:
+        type: string
+        description: Raw SQL statement to be executed.
+    required: [sql]
+    additionalProperties: false
+  - type: object
+    title: Case Statement
+    properties:
+      case:
+        type: array
+        items:
+          type: object
+          additionalProperties:
+            type: string
+          minProperties: 1
+          maxProperties: 1
+        minItems: 1
+        description: |
+          A series of condition-result pairs. The first condition that evaluates to true
+          determines the result. The last condition is often 'true' to provide a default result.
+    required: [case]
+    additionalProperties: false
+
 examples:
-  # String Functions
-  - 'contains("world", full_text)'
-  - 'ends_with(".com", email)'
-  - 'extract(1, 3, name) == "Joh"'
-  - 'length(description) > 100'
-  - 'lower(country) == "usa"'
-  - 'ltrim(code) != code'
-  - 'replace("old", "new", phrase) != phrase'
-  - 'rtrim(status) != status'
-  - 'starts_with("Mr.", full_name)'
-  - 'trim(title) != title'
-  - 'upper(category) == "ELECTRONICS"'
+  # Simple Expressions
+  - price * quantity > 1000
+  - date.year(order_date) == 2023
+  - lower(email) ~= "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$"
+  - array_contains(tags, 'urgent') && status != 'completed'
+  - date.diff_days(current_date(), ship_date) <= 3
+  - sqrt(latitude^2 + longitude^2) < 10
 
-  # Numeric Functions
-  - 'abs(balance) > 1000'
-  - 'acos(value) < pi() / 2'
-  - 'asin(ratio) > 0'
-  - 'atan(slope) != 0'
-  - 'ceil(price) == 100'
-  - 'cos(angle) < 0'
-  - 'degrees(angle_rad) == 180'
-  - 'exp(power) > 100'
-  - 'floor(measurement) == 9'
-  - 'ln(growth_rate) > 0'
-  - 'log(100, value) == 2'
-  - 'log10(population) > 6'
-  - 'pi() == 3.14159265359'
-  - 'pow(2, exponent) > 1000'
-  - 'radians(angle_deg) == pi()'
-  - 'round(2, price) == 19.99'
-  - 'sin(angle) > 0'
-  - 'sqrt(area) < 10'
-  - 'tan(angle) != 0'
+  - "(last_name | text.lower | text.starts_with('a'))"
+  - "(age | math.pow 2)"
+  - "(invoice_date | date.to_text '%d/%m/%Y')"
+  - "(customer_data | json.extract 'preferences' | json.extract 'theme' | text.lower | text.equals 'dark')"
+  - "(order_total | math.round 2 | math.gt 1000)"
 
-  # Date Functions
-  - 'date.to_text "%d/%m/%Y" invoice_date == "01/05/2023"'
 
-  # Regular Expression
-  - 'name ~= "^[A-Z][a-z]+$"'
+  # SQL Statements
+  - sql: SELECT AVG(price) FROM products WHERE category = 'Electronics'
+  - sql: |
+      WITH ranked_sales AS (
+        SELECT product_id, sales_amount,
+               ROW_NUMBER() OVER (PARTITION BY category ORDER BY sales_amount DESC) AS rank
+        FROM sales
+      )
+      SELECT product_id, sales_amount
+      FROM ranked_sales
+      WHERE rank <= 3
 
-  # SQL Function Usage
-  - sql'regexp_contains(title, ''([a-z0-9]*-){{2,}}'')'
+  # Case Statements
+  - case:
+      - age < 13: "Child"
+      - age < 20: "Teenager"
+      - age < 65: "Adult"
+      - true: "Senior"
 
-  # String Formatting
-  - f'{first_name} {last_name}" == "John Doe"''
+  - case:
+      - stock_quantity == 0: "Out of Stock"
+      - stock_quantity < reorder_point: "Low Stock"
+      - stock_quantity < 2 * reorder_point: "Moderate Stock"
+      - true: "Well Stocked"
 
-  # Combinations of Functions
-  - 'length(trim(description)) > 100'
-  - 'starts_with("Dr.", full_name) && ends_with("PhD", full_name)'
-  - 'abs(round(2, price - 10.00)) < 0.01'
-  - 'log10(pow(10, value)) == value'
-  - 'lower(extract(1, 3, name)) == "joh"'
-  - 'contains(lower(email), "admin")'
+  - case:
+      - order_total > 1000 && is_repeat_customer: "VIP"
+      - order_total > 1000: "Big Spender"
+      - is_repeat_customer: "Loyal Customer"
+      - true: "New Customer"
 
-#### Examples of Operators
+  - case:
+      - sentiment_score > 0.8: "Very Positive"
+      - sentiment_score > 0.6: "Positive"
+      - sentiment_score > 0.4: "Neutral"
+      - sentiment_score > 0.2: "Negative"
+      - true: "Very Negative"
 
-  # Intermediate complexity
-  - '(revenue - costs) / revenue > 0.2'
-  - 'date.year(order_date) == 2023 && total_amount > 500'
-  - 'length(trim(description)) in 50..100'
-  - 'sqrt(x**2 + y**2) <= 10'
-  - 'age >= 18 && (has_parental_consent || country != "US")'
-  - 'product.category == "Electronics" && (price > 1000 || is_on_sale)'
-
-  # More complex examples
-  - '(price * (1 - discount_rate)) < (competitor_price ?? 9999)'
-  - 'abs(actual_delivery_date - estimated_delivery_date).days <= 2'
-  - '(temperature - 32) * (5/9) between 20..30'
-  - 'round(2, revenue / 1000000) == total_millions'
-  - '(stock_quantity > reorder_point) || (is_backordered && expected_restock_date <= current_date + 7)'
-
-  # Advanced and very complex examples
-  - '((price > 100 && rating >= 4) || (price <= 100 && rating > 4.5)) && in_stock && !discontinued'
-  - 'cos(latitude) * cos(longitude) + sin(latitude) * sin(longitude) > 0.9'
-  - 'regex_match(email, "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") && !contains("temp", lower(email))'
-  - '(date.year(current_date) - date.year(birth_date) >= 18) || (guardian.age >= 21 && has_signed_consent)'
-  - '(((revenue - direct_costs) / revenue > 0.6) && (customer_satisfaction > 4.5)) || (market_share > 0.3 && year_over_year_growth > 0.15)'
-  - 'log(sales_volume) / log(2) > 10 && (inventory_turnover ?? 0) between 4..8'
-  - '(product.weight * quantity <= max_shipping_weight) && (total_volume <= max_container_volume) && (shipping_distance <= max_shipping_distance || is_premium_customer)'
-
-  # Examples with multiple operators and parentheses
-  - '((a + b) * c - (d / e)) % f == 0'
-  - 'x ** (y % 3) + z // 2 >= threshold'
-  - '!((a && b) || (c && d)) == ((!a || !b) && (!c || !d))'
-  - '(start_date..end_date).contains(current_date) && status != "cancelled"'
-
-  # Examples with coalesce and complex conditions
-  - 'coalesce(nickname, firstname, "Anonymous") != "Anonymous" && age ?? 0 >= 13'
-  - '(balance ?? 0) - (pending_charges ?? 0) >= minimum_balance'
-  - 'primary_category ?? secondary_category ?? default_category == "misc"'
-
-  # Examples with string and date manipulation
-  - 'lower(trim(title)).starts_with("the") && publish_date.year >= 2000'
-  - 'date.diff_months(subscription_start, current_date) % 12 == 0 && is_active'
-  - '(firstname + " " + lastname).length <= 50 && !contains(email, " ")'
-
-  # Examples with mathematical and statistical functions
-  - 'sqrt(a**2 + b**2) < c && max(x, y, z) <= 100'
-  - 'sin(angle)**2 + cos(angle)**2 == 1 && tan(angle) != 0'
-  - 'abs((actual - forecast) / forecast) <= 0.1 && confidence_level >= 0.95'
-
-  # Examples with complex business logic
-  - '(is_weekday(order_date) && hour(order_time) between 9..17) || (is_weekend(order_date) && rush_order)'
-  - '(ltv > 1000 || (purchase_count > 5 && average_order_value > 200)) && days_since_last_purchase <= 90'
-  - 'stock_level < reorder_point && !is_discontinued && supplier.lead_time <= 14 && (current_month != 12 || is_essential_product)'
+  # Complex Expressions
+  - (revenue - cost) / revenue * 100 > 20 && units_sold > 100
+  - date.day_of_week(order_date) in [6, 7] || date.is_holiday(order_date)
+  - json.extract_path_text(user_data, 'preferences', 'theme') == 'dark'
+  - date.add_months(subscription_start, 12) > current_date() && is_active
+  - array_length(regexp_split_to_array(trim(description), '\s+')) between 50..100

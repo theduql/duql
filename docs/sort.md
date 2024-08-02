@@ -70,7 +70,7 @@ sort:
 
 ```yaml
 sort:
-  s: "CASE WHEN status = 'urgent' THEN 0 ELSE 1 END, created_at DESC"
+  sql: "CASE WHEN status = 'urgent' THEN 0 ELSE 1 END, created_at DESC"
 ```
 
 ## Best Practices

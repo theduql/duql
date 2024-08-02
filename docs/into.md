@@ -27,12 +27,12 @@ into: monthly_sales_report
 ```yaml
 dataset: sales_transactions
 steps:
-  - filter: date >= @2023-01-01
-  - group:
-      by: [product_category]
-      summarize:
-        total_sales: sum amount
-  - sort: -total_sales
+- filter: date >= @2023-01-01
+- group:
+    by: [product_category]
+    summarize:
+      total_sales: sum amount
+- sort: -total_sales
 into: top_selling_categories
 ```
 

@@ -1,5 +1,3 @@
-Certainly! Let's move on to the "loop" component, maintaining the same high-quality documentation style:
-
 # DUQL Loop
 
 The `loop` function in DUQL is used for iterative processing. It applies a sequence of steps repeatedly to an initial dataset until a termination condition is met, typically when the step function returns an empty table.
@@ -8,9 +6,9 @@ The `loop` function in DUQL is used for iterative processing. It applies a seque
 
 ```yaml
 loop:
-  - <step_1>
-  - <step_2>
-  # ...
+- <step_1>
+- <step_2>
+# ...
 ```
 
 ## Parameters
@@ -29,10 +27,10 @@ Each step in the loop can be any valid DUQL transformation, such as `filter`, `g
 
 ```yaml
 loop:
-  - filter: remaining_balance > 0
-  - generate:
-      remaining_balance: remaining_balance - payment_amount
-  - append: payments_made
+- filter: remaining_balance > 0
+- generate:
+    remaining_balance: remaining_balance - payment_amount
+- append: payments_made
 ```
 
 This loop continues to process payments until the remaining balance is zero or negative.
@@ -41,12 +39,12 @@ This loop continues to process payments until the remaining balance is zero or n
 
 ```yaml
 loop:
-  - join:
-      dataset: employees
-      where: managers.id == employees.manager_id
-  - generate:
-      level: level + 1
-  - filter: not is_null(manager_id)
+- join:
+    dataset: employees
+    where: managers.id == employees.manager_id
+- generate:
+    level: level + 1
+- filter: not is_null(manager_id)
 ```
 
 This loop traverses an employee hierarchy, joining the manager table with itself until it reaches employees with no manager (top level).

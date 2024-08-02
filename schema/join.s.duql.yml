@@ -2,22 +2,46 @@ $schema: https://json-schema.org/draft/2020-12/schema
 $id: https://duql.dev/schema/join.s.duql.yml
 title: DUQL Join Function
 description: |
-  The join function in DUQL is used to combine rows dataset two or more tables based on a related column between them.
+  The join function in DUQL is used to combine rows from two or more tables based on a related column between them.
   It supports different types of joins and allows for complex join conditions.
 type: object
 properties:
   join:
+    title: Join Operation
     type: object
     properties:
-      $ref: 'dataset.s.duql.yml'
+      dataset:
+        title: Join Dataset
+        $ref: 'dataset.s.duql.yml'
+        description: |
+          Specifies the dataset to join with. This can be a table name, file path, or a subquery.
+          Gotcha: Ensure the joined dataset has a column that can be related to the main dataset.
       where:
+        title: Join Condition
         type: string
-        description: The join condition. Can use '==' shorthand for equality joins on matching column names.
+        description: |
+          Defines the join condition. This is typically an equality comparison between columns from both datasets.
+          Can use '==' shorthand for equality joins on matching column names.
+          Example: "orders.customer_id == customers.id"
+          Gotcha: Complex join conditions may impact query performance.
       retain:
+        title: Join Type
         type: string
         enum: [inner, left, right, full]
         default: inner
-        description: The type of join to perform.
+        description: |
+          Specifies the type of join to perform:
+          - inner: Returns only the matched rows (default)
+          - left: Returns all rows from the left table and matched rows from the right table
+          - right: Returns all rows from the right table and matched rows from the left table
+          - full: Returns all rows when there is a match in either left or right table
+          Gotcha: Different join types can significantly affect the result set size and query performance.
+      steps:
+        title: Preprocessing Steps
+        $ref: 'steps.s.duql.yml'
+        description: |
+          Optional preprocessing steps to apply to the joined dataset before the join operation.
+          Gotcha: Complex preprocessing can impact join performance.
     required: [dataset, where]
     additionalProperties: false
 required: [join]
@@ -25,7 +49,6 @@ required: [join]
 examples:
   - join:
       dataset: customers
-      steps: 
       where: orders.customer_id == customers.id
 
   - join:
@@ -35,37 +58,35 @@ examples:
 
   - join:
       dataset: myorg/employee_data.csv
-      type: csv
       where: departments.department_id == employee_data.department_id
       retain: inner
 
   - join:
       dataset: recent_inventory
       steps:
-        - dataset: inventory
-        - filter: last_updated > @2023-01-01
+      - dataset: inventory
+      - filter: last_updated > @2023-01-01
       where: products.product_id == recent_inventory.product_id
       retain: full
 
   - join:
       dataset: customer_views
       steps:
-        - dataset: product_views
-        - filter: view_date >= @2023-01-01
-        - group:
-            by: [customer_id]
-            summarize:
-              total_views: count this
-              unique_products_viewed: count_distinct product_id
+      - dataset: product_views
+      - filter: view_date >= @2023-01-01
+      - group:
+          by: [customer_id]
+          summarize:
+            total_views: count this
+            unique_products_viewed: count_distinct product_id
       where: customers.id == customer_views.customer_id
 
   - join:
-      dataset: sql"""SELECT * dataset myexample"""
+      dataset: sql"""SELECT * FROM myexample"""
       where: ==id
       retain: full
 
   - join:
       dataset: hdfs://cluster/user_profiles/*.parquet
-      type: parquet
       where: users.id == user_profiles.user_id
       retain: left

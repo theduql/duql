@@ -5,11 +5,11 @@ description: |
   Defines the destination for the query results dataset a DUQL query.
 oneOf:
   - name: name
-    title: Name
+    title: Name of Destination Variable
     type: string
     description: The name of the variable that is now a dataset that can be used in other queries via 'dataset'.
 
 examples:
-  - monthly_sales_report
+- monthly_sales_report
 
-  - customer_data_summary
+- customer_data_summary

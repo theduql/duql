@@ -50,7 +50,7 @@ declare:
   active_users:
     dataset: users
     steps:
-      - filter: last_login > @2023-01-01
+    - filter: last_login > @2023-01-01
   
   calculate_age: birth_date -> datediff(years, birth_date, current_date())
 ```
@@ -138,27 +138,27 @@ declare:
 dataset: orders
 
 steps:
-  - join:
-      dataset: recent_customers
-      where: orders.customer_id == recent_customers.id
-  - join:
-      dataset: products
-      where: orders.product_id == products.id
-  - generate:
-      total_amount: quantity * price
-      purchase_month: date_trunc('month', order_date)
-  - group:
-      by: [customer_id, purchase_month, category]
-      summarize:
-        total_spent: sum total_amount
-        num_orders: count order_id
-  - sort: [customer_id, purchase_month, -total_spent]
-  - generate:
-      customer_value:
-        case:
-          - total_spent > 1000: "High"
-          - total_spent > 500: "Medium"
-          - true: "Low"
+- join:
+    dataset: recent_customers
+    where: orders.customer_id == recent_customers.id
+- join:
+    dataset: products
+    where: orders.product_id == products.id
+- generate:
+    total_amount: quantity * price
+    purchase_month: date_trunc('month', order_date)
+- group:
+    by: [customer_id, purchase_month, category]
+    summarize:
+      total_spent: sum total_amount
+      num_orders: count order_id
+- sort: [customer_id, purchase_month, -total_spent]
+- generate:
+    customer_value:
+      case:
+      - total_spent > 1000: "High"
+      - total_spent > 500: "Medium"
+      - true: "Low"
 
 into: customer_purchase_analysis
 ```

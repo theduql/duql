@@ -79,8 +79,8 @@ You can use raw SQL queries as datasets, which is useful for complex data source
 dataset:
   name: recent_orders
   steps:
-    - dataset: orders
-    - filter: order_date >= @2023-01-01
+  - dataset: orders
+  - filter: order_date >= @2023-01-01
 ```
 
 This advanced example shows how to define a dataset based on a subquery, which can be reused in multiple parts of your DUQL script.
@@ -104,7 +104,7 @@ declare:
   recent_customers:
     dataset: customers
     steps:
-      - filter: last_purchase_date >= @2023-01-01
+    - filter: last_purchase_date >= @2023-01-01
 
 dataset:
   name: s3://sales-data/transactions/*.parquet

@@ -8,17 +8,33 @@ description: |
 type: object
 properties:
   sort:
+    title: Sort Operation
     oneOf:
       - type: string
+        description: |
+          A single column name or expression to sort by.
+          Prefix with '-' for descending order.
+          Example: "-age" (sort by age in descending order)
+          Gotcha: Sorting by a nullable column may place NULL values first or last depending on the database.
       - type: array
         items:
           type: string
+        description: |
+          An array of column names or expressions to sort by.
+          Prefix individual items with '-' for descending order.
+          Example: ["department", "-salary"] (sort by department ascending, then salary descending)
+          Gotcha: The order of columns in the array determines the priority of the sort.
       - type: object
         additionalProperties:
           type: string
+        description: |
+          An object mapping column aliases to sort expressions.
+          Use this for complex sorting logic or when you need to rename columns in the output.
+          Example: {"Total Amount": "-order_total", "Customer Name": "customers.name"}
     description: |
       Specifies the sorting criteria. Can be a single column name, an array of column names,
       or an object for more complex sorting. Use '-' prefix for descending order.
+      Gotcha: Sorting can be computationally expensive on large datasets, especially when using complex expressions.
 required: [sort]
 
 examples:
@@ -41,8 +57,7 @@ examples:
       - category
       - -sum(sales_amount)
 
-  - sort:
-      s: "CASE WHEN status = 'urgent' THEN 0 ELSE 1 END, created_at DESC"
+  - sort: sql"CASE WHEN status = 'urgent' THEN 0 ELSE 1 END, created_at DESC"
 
   - sort:
       - country

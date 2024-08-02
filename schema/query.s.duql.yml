@@ -2,20 +2,69 @@ $schema: https://json-schema.org/draft/2020-12/schema
 $id: https://duql.dev/schema/duql.schema.yml
 title: DUQL Query Schema
 description: |
-  The complete schema for DUQL (YAML-based version of PRQL) queries.
+  The complete schema for DUQL queries.
   This schema defines the structure for data transformation and analysis queries,
   incorporating all DUQL components and pipeline functions.
 type: object
 properties:
   settings:
     $ref: 'settings.s.duql.yml'
+    title: Query Settings
+    description: Metadata and configuration options for the DUQL query.
   declare:
     $ref: 'declare.s.duql.yml'
+    title: Variable Declarations
+    description: Defines reusable variables, functions, or query components.
   dataset: 
     $ref: 'dataset.s.duql.yml'
+    title: Main Dataset
+    description: Specifies the primary data source for the query.
   steps:
     $ref: 'steps.s.duql.yml'
+    title: Transformation Steps
+    description: Defines the sequence of operations to be performed on the data.
   into:
     $ref: 'into.s.duql.yml'
+    title: Output Destination
+    description: Specifies the destination for the query results.
 required: [dataset]
-additionalProperties: false 
+additionalProperties: false
+
+examples:
+
+- settings:
+  version: '0.0.1'
+  target: sql.postgres
+
+  declare:
+    recent_customers:
+      dataset: customers
+      steps:
+      - filter: last_purchase > @2023-01-01
+
+  dataset: orders
+
+  steps:
+  - join:
+      dataset: recent_customers
+      where: orders.customer_id == recent_customers.id
+  - join:
+      dataset: products
+      where: orders.product_id == products.id
+  - generate:
+      total_amount: quantity * price
+      purchase_month: date_trunc('month', order_date)
+  - group:
+      by: [customer_id, purchase_month, category]
+      summarize:
+        total_spent: sum total_amount
+        num_orders: count order_id
+  - sort: [customer_id, purchase_month, -total_spent]
+  - generate:
+      customer_value:
+        case:
+        - total_spent > 1000: "High"
+        - total_spent > 500: "Medium"
+        - true: "Low"
+
+  into: customer_purchase_analysis

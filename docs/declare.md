@@ -118,17 +118,16 @@ declare:
   calculate_total: price quantity -> price * quantity * (1 + tax_rate)
   apply_shipping: total -> 
     case:
-      - total >= shipping_threshold: total
-      - true: total + 10
+    - total >= shipping_threshold: total
+    - true: total + 10
   recent_customers:
     dataset: customers
     steps:
-      - filter: last_purchase_date >= @2023-01-01
+    - filter: last_purchase_date >= @2023-01-01
   product_categories:
     dataset: products
     steps:
-      - select: [product_id, category]
-      - distinct
+    - select: [product_id, category]
 
 dataset: orders
 
@@ -188,7 +187,7 @@ In this example, `monthly_sales_report` becomes a named dataset containing the r
 ```yaml
 dataset: monthly_sales_report
 steps:
-  - filter: total_sales > 10000
+- filter: total_sales > 10000
   # ... more steps ...
 ```
 

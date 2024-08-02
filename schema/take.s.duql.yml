@@ -7,14 +7,27 @@ description: |
 type: object
 properties:
   take:
+    title: Take Operation
     oneOf:
       - type: integer
         minimum: 0
+        description: |
+          Specifies the number of rows to take from the beginning of the dataset.
+          Example: 10 (take the first 10 rows)
+          Gotcha: Taking 0 rows can be useful for schema inspection but returns no data.
       - type: string
         pattern: ^(\d+\.\.(\d+)?|\.\.\d+)$
+        description: |
+          Specifies a range of rows to take.
+          Examples:
+          - '5..10': Take rows 5 through 10
+          - '100..': Take all rows starting from row 100
+          - '..50': Take the first 50 rows (equivalent to take: 50)
+          Gotcha: Row numbers are 1-indexed, not 0-indexed.
     description: |
       Specifies the number of rows to take or a range of rows.
       Can be a positive integer or a range in the form of 'start..end', 'start..', or '..end'.
+      Gotcha: The take operation is typically applied after sorting, which can affect which rows are selected.
 required: [take]
 
 examples:

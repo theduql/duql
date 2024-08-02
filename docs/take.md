@@ -68,22 +68,22 @@ Here's an example of a DUQL query that uses `take` to analyze the top-selling pr
 dataset: sales
 
 steps:
-  - join:
-      dataset: products
-      where: sales.product_id == products.id
-  - generate:
-      revenue: price * quantity
-  - group:
-      by: [product_id, product_name, category]
-      summarize:
-        total_revenue: sum(revenue)
-        units_sold: sum(quantity)
-  - sort: -total_revenue
-  - take: 20  # Top 20 products by revenue
-  - generate:
-      average_price: total_revenue / units_sold
-      rank:
-        sql'ROW_NUMBER() OVER (ORDER BY total_revenue DESC)'
+- join:
+    dataset: products
+    where: sales.product_id == products.id
+- generate:
+    revenue: price * quantity
+- group:
+    by: [product_id, product_name, category]
+    summarize:
+      total_revenue: sum(revenue)
+      units_sold: sum(quantity)
+- sort: -total_revenue
+- take: 20  # Top 20 products by revenue
+- generate:
+    average_price: total_revenue / units_sold
+    rank:
+      sql'ROW_NUMBER() OVER (ORDER BY total_revenue DESC)'
 
 into: top_selling_products
 ```

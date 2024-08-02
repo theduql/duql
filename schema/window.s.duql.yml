@@ -1,0 +1,112 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://duql.dev/schema/window.s.duql.yml
+title: DUQL Window Function
+description: |
+  The window function in DUQL is used to perform calculations across a set of rows 
+  that are related to the current row. It allows for complex analytics and comparisons 
+  within specified ranges or groups of data.
+type: object
+properties:
+  window:
+    title: Window Operation
+    type: object
+    properties:
+      rows:
+        title: Row Range
+        oneOf:
+          - type: string
+            pattern: ^(-?\d+)?\.\.(-?\d+)?$
+          - type: integer
+        description: |
+          Specifies a range of rows relative to the current row position.
+          Examples: "0..2" (current row and next two), "-2..0" (previous two rows and current), "..0" (all preceding rows and current)
+          Gotcha: Large row ranges can impact performance on large datasets.
+      range:
+        title: Value Range
+        type: string
+        pattern: ^(-?\d+)?\.\.(-?\d+)?$
+        description: |
+          Specifies a range of values relative to the current row value.
+          Example: "-1000..1000" (all rows within 1000 units of the current row's value)
+          Gotcha: Range is based on the values in the sorted column, not row numbers.
+      expanding:
+        title: Expanding Window
+        type: boolean
+        description: |
+          When true, it's an alias for rows:..0, creating a cumulative window.
+          Useful for running totals or cumulative aggregations.
+          Gotcha: Can lead to performance issues on very large datasets.
+      rolling:
+        title: Rolling Window
+        type: integer
+        minimum: 1
+        description: |
+          Specifies a rolling window of n rows, including the current row.
+          Example: 7 for a 7-day rolling window.
+          Gotcha: Ensure the window size is appropriate for your data and analysis needs.
+    allOf:
+      - $ref: steps.s.duql.yml
+    description: |
+      Defines the window operation. Must include at least one of rows, range, expanding, or rolling,
+      and can include additional steps like sort, select, or generate.
+      Gotcha: Window functions can be computationally expensive, especially on large datasets.
+required: [window]
+
+examples:
+  - window:
+      rows: "0..2"
+      sort: [date, -amount]
+      select:
+        moving_average: average amount
+
+  - window:
+      expanding: true
+      generate:
+        cumulative_sum: sum sales
+
+  - window:
+      rolling: 7
+      generate:
+        weekly_average: average daily_visitors
+
+  - window:
+      rows: "-2..2"
+      sort: date
+      select:
+        centered_median: median temperature
+
+  - window:
+      range: "-1000..1000"
+      sort: price
+      select:
+        price_rank: rank this
+
+  - window:
+      rows: ".."
+      generate:
+        percent_of_total: amount / sum(amount) * 100
+
+  - window:
+      rows: "..0"
+      sort: date
+      generate:
+        running_total: sum amount
+        rank_by_amount: rank -amount
+
+  - window:
+      rolling: 30
+      sort: date
+      generate:
+        volatility: stddev price / average price
+
+  - window:
+      rows: "-1..1"
+      sort: timestamp
+      generate:
+        rate_of_change: (lead(value) - lag(value)) / (2 * interval)
+
+  - window:
+      expanding: true
+      sort: date
+      generate:
+        cumulative_conversion_rate: sum(conversions) / sum(visitors) * 100

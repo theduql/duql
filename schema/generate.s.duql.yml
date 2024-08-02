@@ -3,7 +3,8 @@ $id: https://duql.dev/schema/generate.s.duql.yml
 title: DUQL Generate Function
 description: |
   The generate function in DUQL is used to create new columns or modify existing ones.
-  It supports various expressions, calculations, and conditional logic to derive new values.
+  It supports various expressions, calculations, conditional logic, and SQL functions
+  to derive new values based on existing data.
 type: object
 properties:
   generate:
@@ -11,97 +12,58 @@ properties:
     additionalProperties:
       oneOf:
         - type: string
+          description: Simple expression or column reference.
+        - $ref: 'expression.s.duql.yml'
         - type: object
           properties:
             case:
               type: array
               items:
                 type: object
-                additionalProperties:
-                  type: string
-                minProperties: 1
-                maxProperties: 1
+                properties:
+                  when:
+                    $ref: 'expression.s.duql.yml'
+                  then:
+                    oneOf:
+                      - type: string
+                      - type: number
+                      - $ref: 'expression.s.duql.yml'
+                required: [when, then]
+              minItems: 1
           required: [case]
-        - type: object
-          properties:
-            s:
-              type: string
-          required: [s]
+          description: Case statement for conditional logic.
     minProperties: 1
+    description: Key-value pairs where keys are new column names and values are expressions.
 required: [generate]
+additionalProperties: false
 
 examples:
   - generate:
       full_name: f"{first_name} {last_name}"
       age: datediff(years, birth_date, current_date())
-
-  - generate:
-      is_northern: (latitude | in 0..)
-      should_have_shipped_today: order_time < @08:30
-      first_prql_commit: '@2020-01-01T13:19:55-08:00'
-
   - generate:
       discount:
         case:
-          - total_purchases > 1000: 0.15
-          - total_purchases > 500: 0.10
-          - total_purchases > 100: 0.05
-          - true: 0
-
+          - when: total_purchases > 1000
+            then: 0.15
+          - when: total_purchases > 500
+            then: 0.10
+          - when: total_purchases > 100
+            then: 0.05
+          - when: true
+            then: 0
   - generate:
-      bmi: weight / (height / 100) ^ 2
-      health_status:
-        case:
-          - bmi < 18.5: "Underweight"
-          - bmi < 25: "Normal"
-          - bmi < 30: "Overweight"
-          - true: "Obese"
-
-  - generate:
-      clean_text: 
-        s: "REGEXP_REPLACE(LOWER(text), '[^a-z0-9 ]', '')"
-      word_count:
-        s: "ARRAY_LENGTH(SPLIT(clean_text, ' '))"
-
-  - generate:
-      is_weekend: day_of_week in [6, 7]
-      season:
-        case:
-          - month in [12, 1, 2]: "Winter"
-          - month in [3, 4, 5]: "Spring"
-          - month in [6, 7, 8]: "Summer"
-          - true: "Fall"
-
+      clean_text: sql"REGEXP_REPLACE(LOWER(text), '[^a-z0-9 ]', '')"
   - generate:
       revenue: price * quantity
       profit_margin: (revenue - cost) / revenue * 100
       performance:
         case:
-          - profit_margin > 30: "Excellent"
-          - profit_margin > 20: "Good"
-          - profit_margin > 10: "Average"
-          - true: "Poor"
-
-  - generate:
-      distance: 
-        s: "ST_Distance(ST_Point(long, lat), ST_Point(-74.006, 40.7128))"
-      is_nearby: distance < 10
-
-  - generate:
-      age_group:
-        case:
-          - age < 18: "Under 18"
-          - age < 30: "18-29"
-          - age < 50: "30-49"
-          - age < 65: "50-64"
-          - true: "65+"
-      is_target_demographic: age_group in ["18-29", "30-49"] && income > 50000
-
-  - generate:
-      sentiment_score:
-        s: "COALESCE(sentiment_analysis(review_text), 0)"
-      sentiment:
-        case:
-          - sentiment_score > 0.5: "Positive"
-          - sentiment_score < -0.5: "Negative"
-          - true: "Neutral"
+          - when: profit_margin > 30
+            then: "Excellent"
+          - when: profit_margin > 20
+            then: "Good"
+          - when: profit_margin > 10
+            then: "Average"
+          - when: true
+            then: "Poor"

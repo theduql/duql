@@ -5,9 +5,11 @@ description: Metadata and configuration options for DUQL queries
 type: object
 properties:
   version:
+    title: DUQL Version
     type: string
     description: The version of DUQL being used
   target:
+    title: DUQL Target
     type: string
     description: The target database or SQL dialect for the query
     enum: 

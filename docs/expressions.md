@@ -1,152 +1,143 @@
-# DUQL Expressions
+# DUQL Expression
 
-Expressions in DUQL are powerful constructs used to perform calculations, comparisons, and transformations on data. They are fundamental to many DUQL operations, including filtering, generating new columns, and defining join conditions.
+Expressions in DUQL are powerful constructs used to perform calculations, comparisons, and transformations on data. They are fundamental to many DUQL operations, including filtering, generating new columns, and defining conditions.
 
 ## Syntax
 
-Expressions in DUQL can range from simple column references to complex combinations of functions, operators, and conditional logic. Here's a general syntax overview:
+DUQL expressions can take one of four forms:
+
+1. Inline Expression
+2. SQL Statement
+3. Case Statement
+4. Pipeline
+
+### Inline Expression
 
 ```
-<column_name>                           # Simple column reference
-<function>(<arguments>)                 # Function call
-<expression> <operator> <expression>    # Binary operation
-<unary_operator><expression>            # Unary operation
-case: [<condition>: <result>, ...]      # Conditional expression
+<boolean_expression>
+```
+
+### SQL Statement
+
+```yaml
+sql: <sql_statement>
+```
+
+### Case Statement
+
+```yaml
+case:
+  - <condition_1>: <result_1>
+  - <condition_2>: <result_2>
+  # ...
+  - true: <default_result>
+```
+
+### Pipeline
+
+```
+(<initial_value> | <function_1> | <function_2> | ... | <function_n>)
 ```
 
 ## Types of Expressions
 
-### Column References
+### Inline Expressions
 
-Simply use the column name to reference its values.
+Inline expressions are boolean expressions written directly in DUQL syntax. They can include column references, literals, operators, and function calls.
 
-Example:
+Examples:
 ```yaml
-filter: age > 18
+price * quantity > 1000
+date.year(order_date) == 2023
+lower(email) ~= "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$"
+array_contains(tags, 'urgent') && status != 'completed'
 ```
 
-### Literals
+### SQL Statements
 
-- Strings: Enclosed in double quotes `"example"`
-- Numbers: `42`, `3.14`
-- Booleans: `true`, `false`
-- Dates: `@2023-05-01`
-- Null: `null`
+SQL statements allow you to use raw SQL within your DUQL queries. This is useful for complex operations or database-specific functions.
 
-### Operators
-
-#### Arithmetic Operators
-- Addition: `+`
-- Subtraction: `-`
-- Multiplication: `*`
-- Division: `/`
-- Modulus: `%`
-- Exponentiation: `**`
-
-#### Comparison Operators
-- Equal: `==`
-- Not Equal: `!=`
-- Greater Than: `>`
-- Less Than: `<`
-- Greater Than or Equal: `>=`
-- Less Than or Equal: `<=`
-
-#### Logical Operators
-- AND: `&&`
-- OR: `||`
-- NOT: `!`
-
-#### String Operators
-- Concatenation: `+`
-- Pattern Matching: `~=` (regular expression match)
-
-### Functions
-
-DUQL supports a wide range of functions for various operations:
-
-#### String Functions
-- `lower(text)`: Convert to lowercase
-- `upper(text)`: Convert to uppercase
-- `trim(text)`: Remove leading and trailing whitespace
-- `length(text)`: Get string length
-- `contains(substring, text)`: Check if text contains substring
-
-#### Numeric Functions
-- `abs(number)`: Absolute value
-- `round(number, decimals)`: Round to specified decimal places
-- `ceil(number)`: Round up to the nearest integer
-- `floor(number)`: Round down to the nearest integer
-
-#### Date Functions
-- `year(date)`: Extract year from date
-- `month(date)`: Extract month from date
-- `day(date)`: Extract day from date
-- `datediff(unit, start_date, end_date)`: Calculate difference between dates
-
-#### Aggregate Functions (used in `group` operations)
-- `sum(expression)`: Calculate sum
-- `avg(expression)`: Calculate average
-- `count(expression)`: Count non-null values
-- `min(expression)`: Find minimum value
-- `max(expression)`: Find maximum value
-
-### Conditional Expressions
-
-Use the `case` construct for conditional logic:
-
+Examples:
 ```yaml
-generate:
-  status:
-    case:
-      - age < 18: "Minor"
-      - age < 65: "Adult"
-      - true: "Senior"
+sql: SELECT AVG(price) FROM products WHERE category = 'Electronics'
+
+sql: |
+  WITH ranked_sales AS (
+    SELECT product_id, sales_amount,
+           ROW_NUMBER() OVER (PARTITION BY category ORDER BY sales_amount DESC) AS rank
+    FROM sales
+  )
+  SELECT product_id, sales_amount
+  FROM ranked_sales
+  WHERE rank <= 3
 ```
 
-### SQL Strings
+### Case Statements
 
-Use the `sql''` syntax to include raw SQL in your DUQL expressions. This is useful for database-specific functions or complex operations not yet supported by DUQL.
+Case statements provide a way to express conditional logic. They consist of a series of condition-result pairs. The first condition that evaluates to true determines the result.
 
-Example:
+Examples:
 ```yaml
-filter: sql'regexp_contains(title, ''([a-z0-9]*-){{2,}}'')'
+case:
+  - age < 13: "Child"
+  - age < 20: "Teenager"
+  - age < 65: "Adult"
+  - true: "Senior"
 
-## Examples
-
-### Basic Arithmetic and Comparison
-```yaml
-filter: (price * quantity) > 1000 && discount < 0.2
+case:
+  - order_total > 1000 && is_repeat_customer: "VIP"
+  - order_total > 1000: "Big Spender"
+  - is_repeat_customer: "Loyal Customer"
+  - true: "New Customer"
 ```
 
-### String Manipulation
-```yaml
-generate:
-  full_name: f"{lower(first_name)} {upper(last_name)}"
+### Pipelines
+
+Pipelines are a powerful feature in DUQL that allow you to chain multiple operations or functions together. They provide a clear, left-to-right reading order for complex transformations.
+
+Syntax:
+```
+(<initial_value> | <function_1> | <function_2> | ... | <function_n>)
 ```
 
-### Date Calculations
+Examples:
 ```yaml
-filter: datediff(days, order_date, current_date()) <= 30
+(last_name | text.lower | text.starts_with("a"))
+(age | math.pow 2)
+(invoice_date | date.to_text "%d/%m/%Y")
+(customer_data | json.extract 'preferences' | json.extract 'theme' | text.lower | text.equals 'dark')
 ```
 
-### Complex Conditional Logic
-```yaml
-generate:
-  shipping_cost:
-    case:
-      - weight < 1: 5.99
-      - weight < 5: 9.99
-      - weight < 10: 14.99
-      - true: weight * 2
+How Pipelines Work:
+1. The initial value (often a column name) is passed as input to the first function.
+2. The result of each function is passed as the last argument to the next function.
+3. The final result is the output of the last function in the pipeline.
+
+For example, the pipeline:
+```
+(a | foo 3 | bar 'hello' 'world' | baz)
+```
+is equivalent to:
+```
+baz(bar('hello', 'world', foo(3, a)))
 ```
 
-### Using Functions in Aggregations
+This makes it easier to read and write complex nested function calls, especially when dealing with data transformations that involve multiple steps.
+
+## Complex Expression Examples
+
+DUQL expressions can combine multiple operations and functions for sophisticated data manipulation:
+
 ```yaml
-group:
-  by: category
-  summarize:
-    total_revenue: sum(price * quantity)
-    avg_order_value: avg(price * quantity)
+(revenue - cost) / revenue * 100 > 20 && units_sold > 100
+
+date.day_of_week(order_date) in [6, 7] || date.is_holiday(order_date)
+
+(user_data | json.extract 'preferences' | json.extract 'theme' | text.lower | text.equals 'dark')
+
+date.add_months(subscription_start, 12) > current_date() && is_active
+
+(description | text.trim | text.split '\s+' | array.length | math.between 50 100)
 ```
 
 ## Best Practices
@@ -154,55 +145,19 @@ group:
 1. 🧠 Keep expressions readable by breaking complex logic into smaller parts.
 2. 🔢 Use parentheses to clarify the order of operations in complex calculations.
 3. 🧪 Test expressions with sample data to ensure they produce expected results.
-4. 🏷️ Use meaningful names for generated columns to improve query understandability.
+4. 📊 Consider performance implications of complex expressions, especially in large datasets.
 5. 🚀 Leverage built-in functions to simplify common operations.
-6. 📊 Consider performance implications of complex expressions, especially in large datasets.
+6. 📝 Use case statements for clear, multi-condition logic.
+7. 🔍 When using SQL statements, ensure they are compatible with your target database.
+8. 🔗 Use pipelines to make complex transformations more readable and maintainable.
 
-## Real-World Use Case
+## Related Functions
 
-Here's an example of a DUQL query using various expressions to analyze product performance:
-
-```yaml
-dataset: sales
-
-steps:
-  - generate:
-      sale_date: date.to_text "%Y-%m-%d" timestamp
-      total_amount: price * quantity
-      discount_amount: price * quantity * discount_rate
-      net_amount: total_amount - discount_amount
-  - filter: sale_date >= @2023-01-01
-  - group:
-      by: [product_id, category]
-      summarize:
-        total_sales: sum(net_amount)
-        units_sold: sum(quantity)
-        avg_price: avg(price)
-  - generate:
-      performance_score:
-        case:
-          - total_sales > 10000 && units_sold > 100: "High"
-          - total_sales > 5000 || units_sold > 50: "Medium"
-          - true: "Low"
-      price_category:
-        case:
-          - avg_price < 50: "Budget"
-          - avg_price < 200: "Mid-range"
-          - true: "Premium"
-  - sort: -total_sales
-
-into: product_performance_analysis
-```
-
-This query demonstrates the use of various expressions to:
-1. Generate new columns with calculated values
-2. Filter data based on a date condition
-3. Perform grouping and aggregation
-4. Create categorical columns based on complex conditions
-5. Sort the results
-
-The resulting `product_performance_analysis` dataset provides valuable insights into product performance, considering sales amounts, units sold, and pricing strategies.
+- [`filter`](filter.md): Often uses expressions to define row selection criteria.
+- [`generate`](generate.md): Uses expressions to create or modify columns.
+- [`group`](group.md): Can use expressions in summarizations and having clauses.
+- [`sort`](sort.md): May use expressions to define custom sorting logic.
 
 ---
 
-> 💡 **Tip:** Expressions are the building blocks of powerful DUQL queries. Master them to unlock the full potential of your data analysis capabilities!
+> 💡 **Tip:** Pipelines in DUQL expressions are a powerful tool for creating clear and maintainable data transformations. They allow you to break down complex operations into a series of simple steps, making your queries easier to read and modify. Experiment with pipelines to streamline your data processing logic!

@@ -3,99 +3,95 @@ $id: https://duql.dev/schema/group.s.duql.yml
 title: DUQL Group Function
 description: |
   The group function in DUQL is used to aggregate data based on specified columns.
-  It supports grouping by single or multiple columns, all columns dataset a table,
+  It supports grouping by single or multiple columns, all columns from a table,
   various aggregation functions, sorting of results, and limiting the number of rows returned.
 type: object
 properties:
   group:
+    title: Group Operation
     type: object
     properties:
       by:
+        title: Grouping Columns
         oneOf:
           - type: string
           - type: array
             items:
               type: string
-        description: Columns to group by. Can be a single column, an array of columns, or 'table.*' for all columns of a table.
-      summarize:
-        type: object
-        additionalProperties:
-          type: string
-        description: Aggregation functions to apply to grouped data.
-      sort:
-        oneOf:
-          - type: string
-          - type: array
-            items:
-              type: string
-        description: Columns to sort the grouped results by. Prefix with '-' for descending order.
-      take:
-        oneOf:
-          - type: integer
-          - type: string
-        description: Number of rows to return or a range (e.g., '1..10').
+        description: |
+          Specifies the columns to group by. This can be:
+          - A single column name (e.g., "department")
+          - An array of column names (e.g., ["year", "month", "category"])
+          - 'table.*' to group by all columns of a table
+          Gotcha: Grouping by too many columns can lead to performance issues and may not provide meaningful aggregations.
     required: [by]
-    additionalProperties: false
+    allOf:
+      - $ref: steps.s.duql.yml
+    description: |
+      Defines the grouping operation. Must include a 'by' property and can include additional
+      steps like summarize, filter, generate, etc.
+      Gotcha: The order of steps within the group operation can affect the final result.
 required: [group]
 
 examples:
-  - group:
-      by: employees.*
-      take: 1
+- group:
+    by: department
+    summarize:
+      avg_salary: average salary
+      employee_count: count employee_id
+    filter: avg_salary > 50000
+    sort: -avg_salary
+    take: 5
 
-  - group:
-      by: billing_city
-      take: 3
+- group:
+    by: [year(order_date), customer_id]
+    summarize:
+      total_spent: sum order_total
+      order_count: count order_id
+    generate:
+      avg_order_value: total_spent / order_count
+    filter: order_count > 10
+    sort: [year(order_date), -total_spent]
 
-  - group:
-      by: product_category
-      summarize:
-        total_sales: sum amount
-      take: 5
+- group:
+    by: product_category
+    summarize:
+      revenue: sum sales_amount
+      cost: sum product_cost
+    generate:
+      profit_margin: (revenue - cost) / revenue * 100
+    sort: -profit_margin
+    take: 10
 
-  - group:
-      by: [year(order_date), month(order_date)]
-      summarize:
-        order_count: count order_id
-        total_revenue: sum total_amount
-      sort: [year(order_date), month(order_date)]
+- group:
+    by: customer_id
+    generate:
+      last_purchase_date: max(order_date)
+      total_purchases: count(order_id)
+      favorite_category: mode(product_category)
+    filter: total_purchases > 5
+    sort: -last_purchase_date
+    take: 100
 
-  - group:
-      by: customer_id
-      summarize:
-        last_purchase: max order_date
-        total_spent: sum amount
-      sort: -total_spent
-      take: '1..10'
+- group:
+    by: [department, job_title]
+    window:
+      salary_rank:
+        function: rank
+        over:
+          partition: [department]
+          sort: -salary
+    filter: salary_rank <= 3
+    sort: [department, job_title, salary_rank]
 
-  - group:
-      by: department.*
-      summarize:
-        avg_salary: average salary
-      take: 1000
-
-  - group:
-      by: status
-      take: '1..'
-
-  - group:
-      by: [category, subcategory]
-      summarize:
-        item_count: count product_id
-        total_value: sum (price * stock_quantity)
-      sort: -total_value
-      take: 20
-
-  - group:
-      by: age_group
-      summarize:
-        user_count: count user_id
-        avg_session_duration: average session_duration
-      sort: -user_count
-
-  - group:
-      by: transaction_date
-      summarize:
-        daily_total: sum amount
-        transaction_count: count transaction_id
-      take: '1..30'
+- group:
+    by: [year(transaction_date), month(transaction_date)]
+    generate:
+      monthly_revenue: sum(transaction_amount)
+    window:
+      revenue_growth:
+        function: (monthly_revenue - lag(monthly_revenue)) / lag(monthly_revenue) * 100
+        over:
+          sort: [year(transaction_date), month(transaction_date)]
+    filter: revenue_growth < 0
+    sort: [year(transaction_date), month(transaction_date)]

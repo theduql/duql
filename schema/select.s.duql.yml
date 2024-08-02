@@ -4,27 +4,52 @@ title: DUQL Select Function
 description: |
   The select function in DUQL is used to specify which columns to include in the output.
   It can be used to choose existing columns, rename columns, compute new columns,
-  or select all columns dataset a specific table. The select! variant is used to exclude specified columns.
+  or select all columns from a specific table. The select! variant is used to exclude specified columns.
+  You must use either 'select' to include specific columns or 'select!' to exclude specific columns.
+  Using both in the same operation is not allowed.
 type: object
 properties:
   select:
+    title: Select Operation
     oneOf:
       - type: array
         items:
-          type: string
-        description: List of column names to include.
+          oneOf:
+            - type: string
+            - type: object
+              additionalProperties:
+                type: string
+              maxProperties: 1
+        description: |
+          List of column names to include in the output, optionally with computed columns.
+          String items represent existing columns.
+          Object items represent computed columns with a single key-value pair.
+          Example: ["id", "name", {"Total": "price * quantity"}]
+          Gotcha: Order of items in the array determines the order in the output.
       - type: object
         additionalProperties:
           type: string
-        description: Object mapping new column names to expressions.
+        description: |
+          Object mapping new column names to expressions or existing column names.
+          Use this for renaming columns or computing new columns.
+          Example: {"Full Name": "f"{first_name} {last_name}"", "Total": "price * quantity"}
+          Gotcha: Complex expressions may impact query performance.
+    description: |
+      Specifies which columns to include in the output and how to compute or rename them.
+      Gotcha: Selecting unnecessary columns can impact query performance and result size.
   select!:
+    title: Exclude Columns
     type: array
     items:
       type: string
-    description: List of column names to exclude.
+    description: |
+      List of column names to exclude from the output. All other columns will be included.
+      Example: ["password", "credit_card_number"]
+      Gotcha: Changes to the underlying schema may affect which columns are excluded.
 oneOf:
   - required: [select]
   - required: [select!]
+
 
 examples:
   - select: [id, name, email]
@@ -58,16 +83,14 @@ examples:
       - inventory.quantity_on_hand
 
   - select:
-      User ID: id
-      Username: username
-      Last Login: 
-        s: "DATE_FORMAT(last_login, '%Y-%m-%d %H:%i:%s')"
+      - User ID: id
+      - Username: username
+      - Last Login: sql"DATE_FORMAT(last_login, '%Y-%m-%d %H:%i:%s')"
 
   - select:
       - category
       - product_name
       - Sales: sum(quantity * price)
-      - "% of Total Sales": 
-          s: "SUM(quantity * price) / SUM(SUM(quantity * price)) OVER () * 100"
+      - "% of Total Sales": sql"SUM(quantity * price) / SUM(SUM(quantity * price)) OVER () * 100"
 
   - select!: [created_at, updated_at, deleted_at]

@@ -1,38 +1,76 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://example.com/declare.s.duql.yml
+$id: https://duql.dev/schema/declare.s.duql.yml
 title: DUQL Variable Declaration
 description: |
   Defines variable declarations in DUQL. These declarations can include simple aliases,
-  tuples, function declarations, SQL interop, arrays, and complex expressions.
-  When translated to PRQL, each key becomes an individual 'let' declaration.
+  complex expressions, function definitions, pipelines, and tuples.
+  Declarations are used to create reusable components within DUQL queries.
 type: object
 propertyNames:
   pattern: ^[a-zA-Z_][a-zA-Z0-9_]*$
+  description: Variable names must start with a letter or underscore, followed by letters, numbers, or underscores.
 patternProperties:
   ^[a-zA-Z_][a-zA-Z0-9_]*$:
     oneOf:
-      - $ref: pipeline.s.duql.yml 
-      - name: Function Definition (String Form)
-        type: string
-        description: Function Definition for defining the declaration.
+      - $ref: 'pipeline.s.duql.yml'
+        title: Pipeline Declaration
+        description: Defines a reusable pipeline of operations.
+      - type: string
+        title: Simple Expression or Function Definition
+        description: A simple expression or a function definition in string form.
         examples:
-          - low:0 high x -> (x - low) / (high - low)
-          - col -> (col | text.lower | text.starts_with("a"))
-          - (col | in ["PRQL", "Rust"])
-      - type: Tuple
-        description: A tuple (essentially an ad-hoc table)
+          - "x -> x * 2"
+          - "low:0 high x -> (x - low) / (high - low)"
+      - type: object
+        title: Tuple Declaration
+        description: Defines a tuple (essentially an ad-hoc table).
+        additionalProperties: true
         examples:
-          - {x:2, y}
-          - {foo:1, bar:baz}
-      - name: Function Definition (DUQL Form)
-        type: object
+          - {x: 2, y: 3}
+          - {name: "John", age: 30}
+      - type: object
+        title: Function Definition
+        description: Detailed function definition with parameters and expression.
         properties:
           parameters:
             type: array
-            examples: 
-              - [low:0, high, x]
-            description: |
-              Positional parameters, which require an argument to be provided when used. (foo)
-              Named parameters, which optionally take an argument, otherwise use their default value. (e.g. low:0)
+            items:
+              oneOf:
+                - type: string
+                - type: object
+                  properties:
+                    name:
+                      type: string
+                    default:
+                      type: [string, number, boolean, "null"]
+                  required: [name]
+            description: List of parameters, optionally with default values.
           expression:
-            $ref: expression.s.duql.yml
+            $ref: 'expression.s.duql.yml'
+            description: The function body as an expression.
+        required: [parameters, expression]
+      - $ref: 'expression.s.duql.yml'
+        title: Complex Expression
+        description: A complex expression using DUQL's expression syntax.
+additionalProperties: false
+
+examples:
+  - tax_rate: 0.08
+  - calculate_total: "price quantity -> price * quantity * (1 + tax_rate)"
+  - point: {x: 10, y: 20}
+  - is_adult:
+      parameters:
+        - name: age
+        - name: country
+          default: "US"
+      expression: 
+        case:
+          - when: country == "US"
+            then: age >= 21
+          - when: true
+            then: age >= 18
+  - active_users:
+      dataset: users
+      steps:
+        - filter: last_login > current_date() - interval '30 days'
+        - select: [id, name, email]

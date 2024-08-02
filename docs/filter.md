@@ -99,31 +99,31 @@ Here's an example of a DUQL query that uses multiple `filter` steps to analyze h
 dataset: orders
 
 steps:
-  - filter: order_date >= @2023-01-01
-  - join:
-      dataset: customers
-      where: orders.customer_id == customers.id
-  - filter: customers.account_created_at < @2022-01-01  # Loyal customers
-  - join:
-      dataset: products
-      where: orders.product_id == products.id
-  - generate:
-      order_total: quantity * price
-      is_discounted: discount_rate > 0
-  - filter: order_total > 1000  # High-value orders
-  - group:
-      by: [customer_id, customers.name]
-      summarize:
-        total_spent: sum(order_total)
-        order_count: count(order_id)
-        discounted_orders: sum(is_discounted)
-  - filter: order_count >= 3  # Repeat high-value customers
-  - generate:
-      average_order_value: total_spent / order_count
-      discount_rate: discounted_orders / order_count
-  - filter: discount_rate < 0.5  # Mostly full-price purchases
-  - sort: -total_spent
-  - take: 100
+- filter: order_date >= @2023-01-01
+- join:
+    dataset: customers
+    where: orders.customer_id == customers.id
+- filter: customers.account_created_at < @2022-01-01  # Loyal customers
+- join:
+    dataset: products
+    where: orders.product_id == products.id
+- generate:
+    order_total: quantity * price
+    is_discounted: discount_rate > 0
+- filter: order_total > 1000  # High-value orders
+- group:
+    by: [customer_id, customers.name]
+    summarize:
+    total_spent: sum(order_total)
+    order_count: count(order_id)
+    discounted_orders: sum(is_discounted)
+- filter: order_count >= 3  # Repeat high-value customers
+- generate:
+    average_order_value: total_spent / order_count
+    discount_rate: discounted_orders / order_count
+- filter: discount_rate < 0.5  # Mostly full-price purchases
+- sort: -total_spent
+- take: 100
 
 into: top_loyal_customers
 ```

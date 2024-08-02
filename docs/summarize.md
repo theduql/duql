@@ -111,27 +111,27 @@ declare:
 dataset: sales
 
 steps:
-  - filter: sale_date >= recent_date
-  - join:
-      dataset: products
-      where: sales.product_id == products.id
-  - generate:
-      revenue: price * quantity
-      margin: calculate_margin(revenue, cost)
-  - group:
-      by: [category, month(sale_date)]
-      summarize:
-        monthly_revenue: sum revenue
-        monthly_quantity: sum quantity
-        avg_margin: avg margin
-        product_count: count_distinct product_id
-  - sort: [category, month(sale_date)]
-  - summarize:
-      total_revenue: sum monthly_revenue
-      total_quantity: sum monthly_quantity
-      overall_avg_margin: avg avg_margin
-      peak_monthly_revenue: max monthly_revenue
-      total_products: sum product_count
+- filter: sale_date >= recent_date
+- join:
+    dataset: products
+    where: sales.product_id == products.id
+- generate:
+    revenue: price * quantity
+    margin: calculate_margin(revenue, cost)
+- group:
+    by: [category, month(sale_date)]
+    summarize:
+      monthly_revenue: sum revenue
+      monthly_quantity: sum quantity
+      avg_margin: avg margin
+      product_count: count_distinct product_id
+- sort: [category, month(sale_date)]
+- summarize:
+    total_revenue: sum monthly_revenue
+    total_quantity: sum monthly_quantity
+    overall_avg_margin: avg avg_margin
+    peak_monthly_revenue: max monthly_revenue
+    total_products: sum product_count
 
 into: sales_performance_summary
 ```

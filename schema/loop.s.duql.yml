@@ -1,25 +1,66 @@
 $schema: https://json-schema.org/draft/2020-12/schema
 $id: https://duql.dev/schema/loop.s.duql.yml
 title: DUQL Loop Function
-$comment: EXPERIMENTAL
 description: |
-  The loop function in DUQL is used for iterative processing. It applies a single step function 
-  repeatedly to an initial relation until the step function returns an empty table.
-type: array
-items:
-  oneOf:
-    - $ref: 'filter.s.duql.yml'
-    - $ref: 'generate.s.duql.yml'
-    - $ref: 'group.s.duql.yml'
-    - $ref: 'join.s.duql.yml'
-    - $ref: 'select.s.duql.yml'
-    - $ref: 'sort.s.duql.yml'
-    - $ref: 'take.s.duql.yml'
-    - $ref: 'window.s.duql.yml'
-    - $ref: 'append.s.duql.yml'
-    - $ref: 'remove.s.duql.yml'
-    - $ref: 'intersect.s.duql.yml'
-    - $ref: 'distinct.s.duql.yml'
-    - $ref: 'union.s.duql.yml'
-    - $ref: 'except.s.duql.yml'
-    - $ref: 'loop.s.duql.yml'
+  The loop function in DUQL is used for iterative processing. It applies a sequence of steps 
+  repeatedly to an initial dataset until a termination condition is met, typically when the 
+  step function returns an empty table.
+  IMPORTANT: This feature is experimental and may be subject to changes in future versions.
+type: object
+properties:
+  loop:
+    title: Loop Operation
+    type: array
+    items:
+      oneOf:
+        - $ref: 'filter.s.duql.yml'
+        - $ref: 'generate.s.duql.yml'
+        - $ref: 'group.s.duql.yml'
+        - $ref: 'join.s.duql.yml'
+        - $ref: 'select.s.duql.yml'
+        - $ref: 'sort.s.duql.yml'
+        - $ref: 'take.s.duql.yml'
+        - $ref: 'window.s.duql.yml'
+        - $ref: 'append.s.duql.yml'
+        - $ref: 'remove.s.duql.yml'
+        - $ref: 'intersect.s.duql.yml'
+        - $ref: 'distinct.s.duql.yml'
+        - $ref: 'union.s.duql.yml'
+        - $ref: 'except.s.duql.yml'
+        - $ref: 'loop.s.duql.yml'
+    description: |
+      An array of steps to be applied iteratively. The loop continues until one of the steps 
+      produces an empty result set.
+      Gotcha: Ensure that your loop has a termination condition to avoid infinite loops.
+required: [loop]
+
+examples:
+  - loop:
+      - filter: remaining_balance > 0
+      - generate:
+          remaining_balance: remaining_balance - payment_amount
+      - append: payments_made
+
+  - loop:
+      - join:
+          dataset: employees
+          where: managers.id == employees.manager_id
+      - generate:
+          level: level + 1
+      - filter: not is_null(manager_id)
+
+  - loop:
+      - filter: convergence_delta > 0.001
+      - generate:
+          new_value: (value + target / value) / 2
+          convergence_delta: abs(new_value - value)
+          value: new_value
+      - take: 1000  # Safety limit to prevent infinite loops
+
+  - loop:
+      - filter: unprocessed_items > 0
+      - generate:
+          batch: take(items, 100)
+          processed_items: processed_items + process_batch(batch)
+          unprocessed_items: unprocessed_items - 100
+      - append: processed_batches

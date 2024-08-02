@@ -1,170 +1,146 @@
-# DUQL Group
+# DUQL Group Function
 
-The `group` function in DUQL is used to aggregate data based on specified columns. It allows you to perform calculations across sets of rows that have the same values in one or more columns.
+The `group` function in DUQL is a powerful tool for aggregating and analyzing data based on specified columns. It supports a wide range of operations, allowing for complex data transformations and analyses within grouped data.
 
 ## Syntax
 
 ```yaml
 group:
   by: <grouping_columns>
-  summarize:
-    <new_column_name>: <aggregation_function>
-  sort: <sorting_criteria>
-  take: <limit>
+  <additional_steps>
 ```
 
 ## Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `by` | string or array | Yes | Columns to group by |
-| `summarize` | object | No | Aggregations to perform on grouped data |
-| `sort` | string or array | No | Columns to sort the grouped results by |
-| `take` | integer or string | No | Number of rows to return or a range |
+| `by` | string or array | Yes | Columns to group by. Can be a single column, an array of columns, or 'table.*' for all columns of a table. |
+| `additional_steps` | object | Yes (at least one) | One or more additional transformation steps to apply to the grouped data. |
 
-### `by`
+## Additional Steps
 
-Specifies the columns to group by. It can be:
-- A single column name
-- An array of column names
-- `table.*` to group by all columns of a table
+The `group` function can include any of the following steps after grouping:
 
-### `summarize`
-
-An object where each key is a new column name, and the value is an aggregation function or expression.
-
-Common aggregation functions:
-- `count`: Count of rows
-- `sum`: Sum of values
-- `avg`: Average of values
-- `min`: Minimum value
-- `max`: Maximum value
-- `count_distinct`: Count of unique values
-
-### `sort`
-
-Specifies the sorting order for the grouped results. Can be:
-- A single column name
-- An array of column names
-- Prefix with `-` for descending order
-
-### `take`
-
-Limits the number of rows in the result. Can be:
-- An integer (e.g., `10`)
-- A range (e.g., `'1..10'`)
+- `summarize`: Perform aggregations on the grouped data.
+- `filter`: Apply conditions to filter the grouped results.
+- `generate`: Create new columns based on grouped data.
+- `join`: Join the grouped data with another dataset.
+- `select`: Choose specific columns from the grouped results.
+- `sort`: Order the grouped results.
+- `take`: Limit the number of grouped results returned.
+- `window`: Perform window functions on the grouped data.
+- `loop`: Perform iterative operations on the grouped data.
 
 ## Examples
 
-### Basic Grouping
+### Basic Grouping with Aggregation and Filtering
 
 ```yaml
 group:
-  by: category
+  by: department
   summarize:
-    total_sales: sum amount
+    avg_salary: average salary
+    employee_count: count employee_id
+  filter: avg_salary > 50000
+  sort: -avg_salary
+  take: 5
 ```
 
-### Multiple Grouping Columns
+This example groups employees by department, calculates average salary and employee count, filters for departments with high average salaries, sorts by average salary descending, and takes the top 5 results.
+
+### Advanced Grouping with Window Functions
 
 ```yaml
 group:
-  by: [year(order_date), month(order_date)]
-  summarize:
-    order_count: count order_id
-    total_revenue: sum total_amount
+  by: [department, job_title]
+  window:
+    salary_rank:
+      function: rank
+      over:
+        partition: [department]
+        sort: -salary
+  filter: salary_rank <= 3
+  sort: [department, job_title, salary_rank]
 ```
 
-### Grouping with Sorting and Limit
+This query ranks employees within each department based on salary, then filters for the top 3 salaries in each department.
+
+### Time-based Analysis with Custom Metrics
 
 ```yaml
 group:
-  by: customer_id
-  summarize:
-    last_purchase: max order_date
-    total_spent: sum amount
-  sort: -total_spent
-  take: 10
+  by: [year(transaction_date), month(transaction_date)]
+  generate:
+    monthly_revenue: sum(transaction_amount)
+  window:
+    revenue_growth:
+      function: (monthly_revenue - lag(monthly_revenue)) / lag(monthly_revenue) * 100
+      over:
+        sort: [year(transaction_date), month(transaction_date)]
+  filter: revenue_growth < 0
+  sort: [year(transaction_date), month(transaction_date)]
 ```
 
-### Grouping by All Columns
+This example demonstrates a monthly revenue analysis, calculating month-over-month growth and identifying periods of negative growth.
+
+### Complex Business Logic with Case Statements
 
 ```yaml
 group:
-  by: employees.*
-  take: 1
+  by: product_id
+  generate:
+    stock_status:
+      case:
+        - inventory_count == 0: "Out of Stock"
+        - inventory_count < reorder_point: "Low Stock"
+        - true: "In Stock"
+  filter: stock_status != "In Stock"
+  sort: [stock_status, product_id]
 ```
 
-### Complex Aggregations
+This query categorizes products based on their inventory status and filters for those needing attention.
+
+### Advanced Analytics with Multiple Steps
 
 ```yaml
 group:
-  by: [category, subcategory]
-  summarize:
-    item_count: count product_id
-    total_value: sum (price * stock_quantity)
-    avg_price: avg price
-    price_range: max price - min price
-  sort: -total_value
-  take: 20
+  by: [store_id, date(sale_timestamp)]
+  generate:
+    daily_sales: sum(sale_amount)
+  window:
+    moving_average:
+      function: avg(daily_sales)
+      over:
+        partition: [store_id]
+        rows: -6..0
+  filter: daily_sales < moving_average * 0.8
+  sort: [store_id, date(sale_timestamp)]
 ```
+
+This complex example calculates daily sales by store, computes a 7-day moving average, and identifies days where sales were significantly below average.
 
 ## Best Practices
 
 1. 🎯 Choose grouping columns carefully to ensure meaningful aggregations.
-2. 🧮 Use appropriate aggregation functions for your data types and analysis goals.
-3. 🏷️ Provide clear names for aggregated columns to improve query readability.
-4. 🚀 Consider performance when grouping by many columns or on large datasets.
-5. 📊 Use sorting and limits to focus on the most important results.
-6. 🔍 Validate your grouping results, especially when using complex expressions.
+2. 📊 Use `summarize` or `generate` to calculate aggregate metrics.
+3. 🔍 Leverage `filter` after aggregation to focus on important results.
+4. 📈 Utilize `window` functions for advanced analytics within groups.
+5. 🔢 Use `sort` and `take` to prioritize and limit results for better performance.
+6. 🧮 Combine multiple steps for complex analyses in a single, readable query.
 
-## Real-World Use Case
+## Related Functions
 
-Here's an example of a DUQL query that uses grouping to analyze sales data:
+- [`summarize`](summarize.md): Often used within `group` to perform aggregations.
+- [`filter`](filter.md): Can be used before or after grouping to refine the dataset.
+- [`generate`](generate.md): Useful for creating new columns based on grouped data.
+- [`window`](window.md): Enables advanced analytical functions within grouped data.
 
-```yaml
-declare:
-  recent_date: @2023-01-01
-  calculate_margin: revenue cost -> (revenue - cost) / revenue * 100
+## Limitations and Considerations
 
-dataset: sales
-
-steps:
-  - filter: sale_date >= recent_date
-  - join:
-      dataset: products
-      where: sales.product_id == products.id
-  - generate:
-      revenue: price * quantity
-      margin: calculate_margin(revenue, cost)
-  - group:
-      by: [category, product_name]
-      summarize:
-        total_revenue: sum revenue
-        total_quantity: sum quantity
-        avg_margin: avg margin
-        num_transactions: count sale_id
-  - sort: -total_revenue
-  - generate:
-    category_rank:
-      s'ROW_NUMBER() OVER (PARTITION BY category ORDER BY total_revenue DESC)'
-  - filter: category_rank <= 5
-
-into: top_products_by_category
-```
-
-This query demonstrates:
-1. Filtering recent sales data
-2. Joining with product information
-3. Calculating revenue and margin
-4. Grouping by product category and name
-5. Aggregating various metrics (revenue, quantity, margin, transaction count)
-6. Sorting by total revenue
-7. Ranking products within each category
-8. Filtering to show only the top 5 products per category
-
-The resulting `top_products_by_category` dataset provides a comprehensive view of the best-performing products in each category, considering multiple performance metrics.
+- Grouping operations can be computationally expensive on large datasets. Use indexing strategies on grouping columns when possible.
+- Be mindful of the order of operations within the `group` function, as it can affect the final results.
+- Some combinations of steps might not be logically valid or may produce unexpected results. Always test your queries thoroughly.
 
 ---
 
-> 💡 **Tip:** The `group` function is a powerful tool for summarizing and analyzing your data. Combine it with other DUQL functions like `generate` and `filter` to create insightful analytical queries!
+> 💡 **Tip:** The `group` function is the cornerstone of data analysis in DUQL. By combining it with various additional steps, you can perform complex aggregations, transformations, and analyses all within a single, readable query structure. Experiment with different combinations to unlock deeper insights from your data!
