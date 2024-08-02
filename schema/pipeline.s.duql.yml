@@ -1,0 +1,12 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://duql.dev/schema/pipeline.s.duql.yml
+title: DUQL Pipeline
+description: |
+  A defined dataset and optionally, steps upon that dataset.
+  If no steps provided will simply return entire dataset declared in `dataset`.
+properties:
+  dataset: 
+    $ref: 'dataset.s.duql.yml'
+  steps:
+    $ref: 'steps.s.duql.yml'
+required: [dataset]

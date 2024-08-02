@@ -1,0 +1,115 @@
+duql:
+  version: '0.0.1'
+  target: sql.bigquery
+  
+declare:
+  recency_weight: 0.5
+  frequency_weight: 0.3
+  monetary_weight: 0.2
+  recent_cutoff: '@2023-01-01'
+  calculate_customer_score:
+    params: [recency, frequency, monetary]
+    body: >
+      (1 - recency / 365) * recency_weight +
+      (frequency / 52) * frequency_weight +
+      (monetary / 1000) * monetary_weight
+
+dataset: orders
+steps:
+  - join:
+      dataset: customers
+      where: orders.customer_id == customers.id
+  - join:
+      dataset: products
+      where: orders.product_id == products.id
+  - join:
+      dataset:
+        type: csv
+        path: "gs://marketing-data/campaigns.csv"
+      where: orders.campaign_id == campaigns.id
+  - generate:
+      order_date: time_utils.parse_date(orders.created_at)
+      is_recent_order: order_date >= recent_cutoff
+      days_since_order: time_utils.days_between(order_date, current_date())
+      customer_age: time_utils.years_between(customers.registration_date, current_date())
+      unit_profit: orders.price - products.cost
+      total_profit: unit_profit * orders.quantity
+  - group:
+      by: [customers.id, customers.email, customers.country]
+      summarize:
+        total_orders: count this
+        total_spent: sum(orders.price * orders.quantity)
+        total_profit: sum(total_profit)
+        last_order_date: max(order_date)
+        avg_order_value: average(orders.price * orders.quantity)
+      filter: total_orders >= 2
+  - generate:
+      recency: time_utils.days_between(last_order_date, current_date())
+      customer_score: calculate_customer_score(recency, total_orders, total_spent)
+  - window:
+      sort: -customer_score
+      generate:
+        customer_rank: sql"""ROW_NUMBER()"""
+  - join:
+      dataset:
+        type: subquery
+        query:
+          dataset: product_views
+          steps:
+            - filter: view_date >= @2023-01-01
+            - group:
+                by: [customer_id]
+                summarize:
+                  total_views: count this
+                  unique_products_viewed: count_distinct product_id
+      where: customers.id == customer_id
+  - generate:
+      ltv_prediction: financial_utils.predict_ltv(total_spent, total_orders, customer_age)
+      segment:
+        case:
+          - customer_score > 0.8: "High Value"
+          - customer_score > 0.5: "Medium Value"
+          - customer_score > 0.3: "Low Value"
+          - true: "At Risk"
+  - join:
+      dataset:
+        type: parquet
+        path: "hdfs://cluster/customer_service/interactions.parquet"
+      where: customers.id == customer_id
+  - group:
+      by: [customers.id, customers.email, customers.country, segment, customer_rank, ltv_prediction]
+      summarize:
+        total_interactions: count interactions.id
+        avg_satisfaction: average(interactions.satisfaction_score)
+  - sort: -customer_score
+  - generate:
+      retention_probability: financial_utils.calculate_retention_prob(recency, total_orders, avg_satisfaction)
+      next_best_action:
+        case:
+          - segment == "At Risk" && retention_probability < 0.3: "Churn Prevention Offer"
+          - segment == "High Value" && total_views > 10: "VIP Product Preview"
+          - total_interactions == 0: "Welcome Series"
+          - avg_satisfaction < 3: "Service Recovery"
+          - true: "Standard Nurture"
+  - select:
+      - customers.id as customer_id
+      - customers.email
+      - customers.country
+      - total_orders
+      - total_spent
+      - total_profit
+      - last_order_date
+      - avg_order_value
+      - customer_score
+      - customer_rank
+      - segment
+      - ltv_prediction
+      - total_views
+      - unique_products_viewed
+      - total_interactions
+      - avg_satisfaction
+      - retention_probability
+      - next_best_action
+  - take: 1000
+
+into: customer_360_view

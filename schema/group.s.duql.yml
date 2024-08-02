@@ -1,0 +1,101 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://duql.dev/schema/group.s.duql.yml
+title: DUQL Group Function
+description: |
+  The group function in DUQL is used to aggregate data based on specified columns.
+  It supports grouping by single or multiple columns, all columns dataset a table,
+  various aggregation functions, sorting of results, and limiting the number of rows returned.
+type: object
+properties:
+  group:
+    type: object
+    properties:
+      by:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+        description: Columns to group by. Can be a single column, an array of columns, or 'table.*' for all columns of a table.
+      summarize:
+        type: object
+        additionalProperties:
+          type: string
+        description: Aggregation functions to apply to grouped data.
+      sort:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+        description: Columns to sort the grouped results by. Prefix with '-' for descending order.
+      take:
+        oneOf:
+          - type: integer
+          - type: string
+        description: Number of rows to return or a range (e.g., '1..10').
+    required: [by]
+    additionalProperties: false
+required: [group]
+
+examples:
+  - group:
+      by: employees.*
+      take: 1
+
+  - group:
+      by: billing_city
+      take: 3
+
+  - group:
+      by: product_category
+      summarize:
+        total_sales: sum amount
+      take: 5
+
+  - group:
+      by: [year(order_date), month(order_date)]
+      summarize:
+        order_count: count order_id
+        total_revenue: sum total_amount
+      sort: [year(order_date), month(order_date)]
+
+  - group:
+      by: customer_id
+      summarize:
+        last_purchase: max order_date
+        total_spent: sum amount
+      sort: -total_spent
+      take: '1..10'
+
+  - group:
+      by: department.*
+      summarize:
+        avg_salary: average salary
+      take: 1000
+
+  - group:
+      by: status
+      take: '1..'
+
+  - group:
+      by: [category, subcategory]
+      summarize:
+        item_count: count product_id
+        total_value: sum (price * stock_quantity)
+      sort: -total_value
+      take: 20
+
+  - group:
+      by: age_group
+      summarize:
+        user_count: count user_id
+        avg_session_duration: average session_duration
+      sort: -user_count
+
+  - group:
+      by: transaction_date
+      summarize:
+        daily_total: sum amount
+        transaction_count: count transaction_id
+      take: '1..30'

@@ -1,0 +1,72 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://duql.dev/schema/join.s.duql.yml
+title: DUQL Join Function
+description: |
+  The join function in DUQL is used to combine rows dataset two or more tables based on a related column between them.
+  It supports different types of joins and allows for complex join conditions.
+type: object
+properties:
+  join:
+    type: object
+    properties:
+      dataset:
+        $ref: 'dataset.s.duql.yml'
+      where:
+        type: string
+        description: The join condition. Can use '==' shorthand for equality joins on matching column names.
+      retain:
+        type: string
+        enum: [inner, left, right, full]
+        default: inner
+        description: The type of join to perform.
+    required: [dataset, where]
+    additionalProperties: false
+required: [join]
+
+examples:
+  - join:
+      dataset: customers
+      steps: 
+      where: orders.customer_id == customers.id
+
+  - join:
+      dataset: products
+      where: orders.product_id == products.id
+      retain: left
+
+  - join:
+      dataset: myorg/employee_data.csv
+      type: csv
+      where: departments.department_id == employee_data.department_id
+      retain: inner
+
+  - join:
+      dataset: recent_inventory
+      steps:
+        - dataset: inventory
+        - filter: last_updated > @2023-01-01
+      where: products.product_id == recent_inventory.product_id
+      retain: full
+
+  - join:
+      dataset: customer_views
+      steps:
+        - dataset: product_views
+        - filter: view_date >= @2023-01-01
+        - group:
+            by: [customer_id]
+            summarize:
+              total_views: count this
+              unique_products_viewed: count_distinct product_id
+      where: customers.id == customer_views.customer_id
+
+  - join:
+      dataset: sql"""SELECT * dataset myexample"""
+      where: ==id
+      retain: full
+
+  - join:
+      dataset: hdfs://cluster/user_profiles/*.parquet
+      type: parquet
+      where: users.id == user_profiles.user_id
+      retain: left

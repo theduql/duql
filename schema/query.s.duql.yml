@@ -1,0 +1,21 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://duql.dev/schema/duql.schema.yml
+title: DUQL Query Schema
+description: |
+  The complete schema for DUQL (YAML-based version of PRQL) queries.
+  This schema defines the structure for data transformation and analysis queries,
+  incorporating all DUQL components and pipeline functions.
+type: object
+properties:
+  settings:
+    $ref: 'settings.s.duql.yml'
+  declare:
+    $ref: 'declare.s.duql.yml'
+  dataset: 
+    $ref: 'dataset.s.duql.yml'
+  steps:
+    $ref: 'steps.s.duql.yml'
+  into:
+    $ref: 'into.s.duql.yml'
+required: [dataset]
+additionalProperties: false 

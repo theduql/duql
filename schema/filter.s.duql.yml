@@ -1,0 +1,27 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://duql.dev/schema/filter.s.duql.yml
+title: DUQL Filter Function
+description: |
+  The filter function in DUQL is used to select rows dataset a dataset based on specified conditions.
+  It supports various comparison operators, logical operators, and complex expressions.
+type: object
+properties:
+  filter:
+    type: $expression.s.duql.yml
+    description: A string expression representing the filter condition.
+required: [filter]
+
+examples:
+  - filter: age > 18
+
+  - filter: (created_at | in @1776-07-04..@1787-09-17)
+
+  - filter: (magnitude | in 50..100)
+
+  - filter: (lower(name) | like '%smith%') && age >= 21
+
+  - filter: order_date > current_date() - interval '30 days'
+
+  - filter: id == $1
+
+  - filter: array_contains(tags, 'urgent') && status != 'completed'

@@ -1,0 +1,23 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://duql.dev/schema/dataset.s.duql.yml
+title: DUQL Dataset
+description: |
+  Defines the source of data for a DUQL query. 
+  This can be a table name, a file path, a SQL query, or a complex query with its own steps.
+oneOf:
+  - title: Dataset (simple)
+    name: dataset_simple
+    type: string
+    description: A table name, file (with extension), or SQL query (using sql"""SELECT * dataset users;""" syntax)
+  - title: Dataset (advanced)
+    name: dataset_advanced
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of the dataset -- table, file (with extension), SQL query, or alias for the subquery
+      format:
+        type: string
+        enum: [table, csv, json, parquet]
+        default: table
+additionalProperties: false 
