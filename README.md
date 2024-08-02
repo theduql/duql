@@ -7,14 +7,14 @@
 - A YAML-based query language
 - Compiles to SQL & JSON
 - [100% open-source](/LICENSE)
-- A layer on top of [PRQL](https://github.com/PRQL/prql)
+- An abstraction on top of the awesome [PRQL](https://github.com/PRQL/prql) project
+- As a result of being directly serializable to (understandable) JSON, great for building frontend query experiences
 
 ## Priorities
-1. JSON Schema Definition
-2. `duql` Utility
-3. VSCode Extension
-> [!IMPORTANT]  
-> Seeking contributors! Please contact hello@assembled.studio
+1. Definition in JSON Schema & Documentation [In Progress]
+2. Validation of translation to PRQL (and as a result SQL)
+3. Query Builder POC
+4. Tooling, etc.
 
 ## Examples
 ### DUQL vs. SQL
@@ -46,54 +46,7 @@
 ## Writing / Editing
 > [!NOTE]  
 > DUQL is 100% valid YAML. As a result, you can leverage all your awesome YAML extensions that exist today.
-
-> [!TIP]  
-> The following line will add base validation and hints:
-> `# yaml-language-server: $schema=https://json.schemastore.org/duql-schema-0.0.0.yml`
+> We plan to support improved syntax highlighting for expression strings in a custom DUQL IDE extension at some point.
 
 ## Usage
-### Basic
-```console
-duql -w
-```
-> [!TIP]  
->  Runs in `watch` mode, generating and updating `.sql` files for `.duql` file changes in current directory.
-> Outputs to `duql` subdirectory.
-
-### Advanced
-```console
-NAME
-    duql - generate sql, json, prql from .duql files
-
-SYNOPSIS
-    duql [OPTIONS]
-
-DESCRIPTION
-    Generates sql, json, or prql files from .duql files in the input directory.
-    When run without options, duql defaults to watch mode with default input and output.
-
-OPTIONS
-    -i, --input INPUT
-        Specify input directory (default: current directory)
-
-    -o, --output OUTPUT
-        Specify output directory (default: 'duql' subdirectory)
-
-    -f, --format FORMAT
-        Specify output format (default: sql)
-
-    -w, --watch
-        Watch for changes and generate automatically (default when no options are provided)
-
-    --wtf
-        Generate a friendly summary using API key
-
-EXAMPLES
-    duql
-        Runs in watch mode with default input and output
-
-    duql --input ./queries --output ./generated --format json
-    duql -i ./queries -o ./generated -f json -w
-    duql --input ./queries --wtf
-
-```
+> Coming Soon
