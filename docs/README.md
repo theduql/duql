@@ -1,6 +1,8 @@
 # Quick Start
 
-DUQL is a powerful, YAML-based query language designed for data transformation and analysis. It's a user-friendly version of [PRQL](https://prql-lang.org) with additional usability improvements. This guide will help you understand the basics of DUQL and get you started with writing your own queries.
+**DUQL** (**Dangerously Usable Query Language**) is a powerful, YAML-based query language designed for data transformation and analysis. DUQL is a variant of [PRQL](https://prql-lang.org) with additional usability improvements, focusing primary on readability and the creation of UI-based query experiences. \
+\
+This guide will help you understand the basics of DUQL and get you started with writing your own queries.
 
 ## 1. Basic Query Structure
 
