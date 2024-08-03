@@ -66,9 +66,9 @@ This loop traverses an employee hierarchy, joining the manager table with itself
 
 ## Related Functions
 
-* [`filter`](../../basic/filter.md): Often used as a termination condition in loops
-* [`generate`](../../intermediate/generate.md): Used to update variables within the loop
-* [`append`](../../append.md): Useful for accumulating results across iterations
+* [`filter`](../basic/filter.md): Often used as a termination condition in loops
+* [`generate`](../intermediate/generate.md): Used to update variables within the loop
+* [`append`](../append.md): Useful for accumulating results across iterations
 
 ## Limitations and Considerations
 

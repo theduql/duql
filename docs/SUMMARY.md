@@ -23,19 +23,19 @@
 * [Groups](intermediate/group.md)
 * [Summarize](intermediate/summarize.md)
 * [Generate](intermediate/generate.md)
+* [Join](intermediate/join.md)
 
 ## Advanced
 
-* [Join](advanced/join.md)
 * [Windows](advanced/window.md)
+* [Loops](advanced/loop.md)
 * [Experimental](advanced/experimental/README.md)
   * [Append](advanced/experimental/append.md)
   * [Distinct](advanced/experimental/distinct.md)
-  * [Except](advanced/experimental/except.md)
   * [Intersect](advanced/experimental/intersect.md)
   * [Remove](advanced/experimental/remove.md)
+  * [Except](advanced/experimental/except.md)
   * [Union](advanced/experimental/union.md)
-  * [Loops](advanced/experimental/loop.md)
 
 ## Language Comparisons
 
