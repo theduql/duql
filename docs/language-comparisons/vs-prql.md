@@ -4,18 +4,19 @@ DUQL is a powerful, YAML-based query language that builds upon the strengths of 
 
 ## Terminology Mapping
 
-| PRQL Term   | DUQL Term  | Description                                          |
-| ----------- | ---------- | ---------------------------------------------------- |
-| `from`      | `dataset`  | Specifies the data source                            |
-| `select`    | `select`   | Chooses columns to include in the output             |
-| `filter`    | `filter`   | Selects rows based on conditions                     |
-| `derive`    | `generate` | Creates new columns or modifies existing ones        |
-| `aggregate` | `group`    | Performs grouping and aggregation operations         |
-| `sort`      | `sort`     | Orders the results                                   |
-| `take`      | `take`     | Limits the number of rows returned                   |
-| `join`      | `join`     | Combines data from multiple sources                  |
-| `window`    | `window`   | Performs calculations across a set of rows           |
-| `let`       | `declare`  | Defines variables, functions, or reusable components |
+| PRQL Term   | DUQL Term   | Description                                          |
+| ----------- | ----------- | ---------------------------------------------------- |
+| `from`      | `dataset`   | Specifies the data source                            |
+| `select`    | `select`    | Chooses columns to include in the output             |
+| `filter`    | `filter`    | Selects rows based on conditions                     |
+| `derive`    | `generate`  | Creates new columns or modifies existing ones        |
+| `group`     | `group`     | Groups by 1 or more columns                          |
+| `aggregate` | `summarize` | Performs aggregation operations                      |
+| `sort`      | `sort`      | Orders the results                                   |
+| `take`      | `take`      | Limits the number of rows returned                   |
+| `join`      | `join`      | Combines data from multiple sources                  |
+| `window`    | `window`    | Performs calculations across a set of rows           |
+| `let`       | `declare`   | Defines variables, functions, or reusable components |
 
 ## Key Advantages of DUQL over PRQL
 
