@@ -1,4 +1,4 @@
-# Developer Observability with DUQL: Metrics, Logs, and APM
+# Developer Observability
 
 DUQL provides powerful capabilities for analyzing and visualizing developer observability data, including metrics, logs, and application performance monitoring (APM) data. This guide will walk you through various examples of how to use DUQL to gain insights from your observability data.
 
@@ -17,22 +17,23 @@ steps:
 - filter: time >= current_timestamp() - interval '24 hours'
 - group:
     by: service
-    summarize:
-      avg_response_time: 
-        avg: 
-          case:
-          - metric_name == 'response_time': data_point
-          - true: null
-      error_rate:
-        sum:
-          case:
-          - metric_name == 'error_count': data_point
-          - true: 0
-        / sum:
-          case:
-          - metric_name == 'request_count': data_point
-          - true: 0
-        * 100
+    steps:
+    - summarize:
+        avg_response_time: 
+          avg: 
+            case:
+            - metric_name == 'response_time': data_point
+            - true: null
+        error_rate:
+          sum:
+            case:
+            - metric_name == 'error_count': data_point
+            - true: 0
+          / sum:
+            case:
+            - metric_name == 'request_count': data_point
+            - true: 0
+          * 100
 - filter: avg_response_time is not null
 - sort: -avg_response_time
 - generate:
@@ -46,6 +47,7 @@ into: service_health_overview
 ```
 
 This query:
+
 1. Filters metrics from the last 24 hours
 2. Groups data by service
 3. Calculates average response time and error rate
@@ -66,9 +68,10 @@ steps:
     && time >= current_timestamp() - interval '1 hour'
 - group:
     by: [host, metric_name]
-    summarize:
-      avg_utilization: avg data_point
-      max_utilization: max data_point
+    steps:
+    - summarize:
+        avg_utilization: avg data_point
+        max_utilization: max data_point
 - generate:
     utilization_status:
       case:
@@ -81,47 +84,12 @@ into: host_resource_utilization
 ```
 
 This query:
+
 1. Filters CPU and memory utilization metrics from the last hour
 2. Groups data by host and metric name
 3. Calculates average and maximum utilization
 4. Generates a utilization status based on maximum utilization
 5. Sorts results by host and maximum utilization (descending)
-
-### 1.3 Anomaly Detection
-
-This example detects anomalies in request latency using a simple statistical approach.
-
-```yaml
-dataset: metrics
-
-steps:
-- filter: 
-    metric_name == 'request_latency'
-    && time >= current_timestamp() - interval '7 days'
-- window:
-    rows: ".."
-    partition: [service]
-    sort: time
-    generate:
-      rolling_avg: avg(data_point)
-      rolling_stddev: stddev(data_point)
-- generate:
-    z_score: (data_point - rolling_avg) / rolling_stddev
-    is_anomaly: abs(z_score) > 3
-- filter: is_anomaly
-- sort: [service, -abs(z_score)]
-- take: 100
-
-into: latency_anomalies
-```
-
-This query:
-1. Filters request latency metrics from the last 7 days
-2. Calculates rolling average and standard deviation for each service
-3. Computes z-score for each data point
-4. Identifies anomalies (z-score > 3 or < -3)
-5. Sorts anomalies by service and absolute z-score
-6. Takes the top 100 anomalies
 
 ## 2. Log Analysis
 
@@ -137,12 +105,14 @@ dataset: logs
 steps:
 - filter: 
     log_level == 'ERROR'
-    && timestamp >= current_timestamp() - interval '24 hours'
+    && 
+    timestamp >= current_timestamp() - interval '24 hours'
 - generate:
     error_type: regexp_extract(message, '^([A-Za-z]+Error)')
 - group:
     by: [service, error_type]
-    summarize:
+    steps:
+    - summarize: 
       error_count: count this
 - sort: [service, -error_count]
 - generate:
@@ -154,6 +124,7 @@ into: error_log_summary
 ```
 
 This query:
+
 1. Filters error logs from the last 24 hours
 2. Extracts error type from the message
 3. Groups errors by service and error type
@@ -173,9 +144,10 @@ steps:
     log_pattern: regexp_replace(message, '[0-9]+', 'N')
 - group:
     by: [service, log_level, log_pattern]
-    summarize:
-      pattern_count: count this
-      example_message: first(message)
+    steps: 
+    - summarize: 
+        pattern_count: count this
+        example_message: first(message)
 - filter: pattern_count > 10
 - sort: [service, -pattern_count]
 - take: 100
@@ -184,6 +156,7 @@ into: common_log_patterns
 ```
 
 This query:
+
 1. Filters logs from the last hour
 2. Generates a log pattern by replacing numbers with 'N'
 3. Groups logs by service, log level, and pattern
@@ -213,7 +186,8 @@ steps:
     where: traces.trace_id == spans.trace_id
 - group:
     by: [traces.trace_id, traces.service, traces.operation]
-    summarize:
+    steps:
+    - summarize:
       total_duration: max(traces.duration)
       span_breakdown:
         sql: "STRING_AGG(CONCAT(spans.service, '.', spans.operation, ': ', spans.duration, 'ms'), ', ' ORDER BY spans.duration DESC)"
@@ -224,6 +198,7 @@ into: slow_transactions
 ```
 
 This query:
+
 1. Filters for root spans (transactions) from the last hour that took more than 1 second
 2. Joins with all spans in the same trace
 3. Groups by trace, service, and operation
@@ -245,13 +220,14 @@ steps:
     where: traces.span_id == child_spans.parent_span_id
 - group:
     by: [traces.service, child_spans.service]
-    summarize:
-      call_count: count(distinct traces.trace_id)
-      avg_duration: avg(child_spans.duration)
-      error_rate: 
-        sum(case when child_spans.status == 'ERROR' then 1 else 0 end) 
-        / count(child_spans.span_id) 
-        * 100
+    steps:
+    - summarize:
+        call_count: count(distinct traces.trace_id)
+        avg_duration: avg(child_spans.duration)
+        error_rate: 
+          sum(case when child_spans.status == 'ERROR' then 1 else 0 end) 
+          / count(child_spans.span_id) 
+          * 100
 - filter: call_count > 100
 - sort: [traces.service, -call_count]
 - generate:
@@ -265,6 +241,7 @@ into: service_dependencies
 ```
 
 This query:
+
 1. Filters traces from the last 24 hours
 2. Joins parent spans with child spans
 3. Groups by parent and child services

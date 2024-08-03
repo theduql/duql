@@ -1,4 +1,4 @@
-# DUQL Filter
+# Filters
 
 The `filter` function in DUQL is used to select rows from a dataset based on specified conditions. It allows you to narrow down your data to only the records that meet certain criteria.
 
@@ -10,15 +10,15 @@ filter: <condition>
 
 ## Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `filter` | string | Yes | A boolean expression representing the filter condition |
+| Parameter | Type   | Required | Description                                            |
+| --------- | ------ | -------- | ------------------------------------------------------ |
+| `filter`  | string | Yes      | A boolean expression representing the filter condition |
 
 ## Behavior
 
-- Evaluates the specified condition for each row in the dataset.
-- Retains only the rows where the condition evaluates to true.
-- Can use complex expressions involving multiple columns, functions, and operators.
+* Evaluates the specified condition for each row in the dataset.
+* Retains only the rows where the condition evaluates to true.
+* Can use complex expressions involving multiple columns, functions, and operators.
 
 ## Examples
 
@@ -113,10 +113,11 @@ steps:
 - filter: order_total > 1000  # High-value orders
 - group:
     by: [customer_id, customers.name]
-    summarize:
-    total_spent: sum(order_total)
-    order_count: count(order_id)
-    discounted_orders: sum(is_discounted)
+    steps:
+        summarize:
+            total_spent: sum(order_total)
+            order_count: count(order_id)
+            discounted_orders: sum(is_discounted)
 - filter: order_count >= 3  # Repeat high-value customers
 - generate:
     average_order_value: total_spent / order_count
@@ -129,6 +130,7 @@ into: top_loyal_customers
 ```
 
 This query demonstrates:
+
 1. Filtering orders by date
 2. Joining with customer and product data
 3. Filtering for loyal customers (account created before 2022)
@@ -142,6 +144,6 @@ This query demonstrates:
 
 The resulting `top_loyal_customers` dataset provides a focused view of the most valuable loyal customers who frequently make large purchases without heavy reliance on discounts.
 
----
+***
 
 > 💡 **Tip:** The `filter` function is your primary tool for data selection in DUQL. Use it strategically throughout your query pipeline to focus your analysis on the most relevant data. Combine it with `generate` and `group` functions for powerful data insights!

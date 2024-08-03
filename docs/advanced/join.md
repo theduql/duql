@@ -1,4 +1,4 @@
-# DUQL Join
+# Join
 
 The `join` function in DUQL is used to combine rows from two or more tables based on a related column between them. It supports different types of joins and allows for complex join conditions.
 
@@ -13,27 +13,27 @@ join:
 
 ## Parameters
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `dataset` | object | Yes | - | The data source to join with (ref: dataset.s.duql.yml) |
-| `where` | string | Yes | - | The join condition |
-| `retain` | string | No | `"inner"` | The type of join to perform |
+| Parameter | Type   | Required | Default   | Description                                            |
+| --------- | ------ | -------- | --------- | ------------------------------------------------------ |
+| `dataset` | object | Yes      | -         | The data source to join with (ref: dataset.s.duql.yml) |
+| `where`   | string | Yes      | -         | The join condition                                     |
+| `retain`  | string | No       | `"inner"` | The type of join to perform                            |
 
 ## Behavior
 
-- Combines rows from the current dataset with rows from the specified dataset based on the join condition.
-- The `dataset` parameter can include its own `steps` for preprocessing before the join.
-- The `where` condition supports a `==` shorthand for equality joins on matching column names.
-- The `retain` parameter specifies the join type, defaulting to an inner join.
+* Combines rows from the current dataset with rows from the specified dataset based on the join condition.
+* The `dataset` parameter can include its own `steps` for preprocessing before the join.
+* The `where` condition supports a `==` shorthand for equality joins on matching column names.
+* The `retain` parameter specifies the join type, defaulting to an inner join.
 
 ## Join Types
 
-| Value | Description |
-|-------|-------------|
-| `"inner"` | Returns only the matched rows (default) |
-| `"left"` | Returns all rows from the left table and matched rows from the right table |
+| Value     | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
+| `"inner"` | Returns only the matched rows (default)                                    |
+| `"left"`  | Returns all rows from the left table and matched rows from the right table |
 | `"right"` | Returns all rows from the right table and matched rows from the left table |
-| `"full"` | Returns all rows when there is a match in either left or right table |
+| `"full"`  | Returns all rows when there is a match in either left or right table       |
 
 ## Examples
 
@@ -82,14 +82,6 @@ join:
 ```yaml
 join:
   dataset: customer_views
-  steps:
-  - dataset: product_views
-  - filter: view_date >= @2023-01-01
-  - group:
-      by: [customer_id]
-      summarize:
-        total_views: count this
-        unique_products_viewed: count_distinct product_id
   where: customers.id == customer_views.customer_id
 ```
 
@@ -97,7 +89,7 @@ join:
 
 ```yaml
 join:
-  dataset: sql"""SELECT * FROM myexample"""
+  dataset: sql'SELECT * FROM myexample'
   where: ==id
   retain: full
 ```
@@ -177,6 +169,7 @@ into: product_sales_report
 ```
 
 This query demonstrates:
+
 1. Joining order data with customer, product, and inventory information
 2. Using subqueries within joins for aggregations
 3. Incorporating SQL queries for complex calculations
@@ -185,6 +178,6 @@ This query demonstrates:
 
 The `join` operations allow us to bring together data from multiple sources, creating a rich dataset for analysis that includes sales performance, customer behavior, inventory status, and category-level benchmarks.
 
----
+***
 
 > 💡 **Tip:** The `join` function in DUQL is highly flexible, allowing you to combine data from various sources and formats. Leverage its ability to include `steps` within the `dataset` parameter to preprocess your data before joining, enabling more sophisticated data integration in your analyses!

@@ -1,4 +1,8 @@
-# DUQL Declare
+# Declare
+
+{% hint style="info" %}
+Declaring variables is optional.
+{% endhint %}
 
 The `declare` component in DUQL allows you to define reusable elements such as variables, functions, and subqueries. These declarations can be referenced throughout your DUQL query, promoting code reuse and improving query readability.
 
@@ -25,6 +29,7 @@ declare:
 You can declare simple variables with literal values or expressions.
 
 Example:
+
 ```yaml
 declare:
   tax_rate: 0.08
@@ -37,12 +42,14 @@ declare:
 Functions can be declared using a simplified arrow syntax or a more detailed YAML structure.
 
 Simple syntax:
+
 ```yaml
 declare:
   calculate_total: price quantity -> price * quantity * (1 + tax_rate)
 ```
 
 Detailed syntax:
+
 ```yaml
 declare:
   calculate_total:
@@ -55,6 +62,7 @@ declare:
 Subqueries are declared as complete DUQL pipelines that can be reused in your main query.
 
 Example:
+
 ```yaml
 declare:
   active_customers:
@@ -132,28 +140,30 @@ declare:
 dataset: orders
 
 steps:
-  - filter: order_date >= @2023-01-01
-  - join:
-      dataset: recent_customers
-      where: orders.customer_id == recent_customers.customer_id
-  - join:
-      dataset: product_categories
-      where: orders.product_id == product_categories.product_id
-  - generate:
-      subtotal: calculate_total(price, quantity)
-      total_with_shipping: apply_shipping(subtotal)
-  - group:
-      by: [customer_id, category]
+- filter: order_date >= @2023-01-01
+- join:
+    dataset: recent_customers
+    where: orders.customer_id == recent_customers.customer_id
+- join:
+    dataset: product_categories
+    where: orders.product_id == product_categories.product_id
+- generate:
+    subtotal: calculate_total(price, quantity)
+    total_with_shipping: apply_shipping(subtotal)
+- group:
+    by: [customer_id, category]
+    steps:
       summarize:
         total_spent: sum(total_with_shipping)
         num_orders: count(order_id)
-  - sort: -total_spent
-  - take: 100
+- sort: -total_spent
+- take: 100
 
 into: top_customer_category_analysis
 ```
 
 This query demonstrates:
+
 1. Declaring constants (`tax_rate`, `shipping_threshold`)
 2. Defining reusable functions (`calculate_total`, `apply_shipping`)
 3. Creating subquery declarations (`recent_customers`, `product_categories`)
@@ -161,7 +171,7 @@ This query demonstrates:
 
 The resulting `top_customer_category_analysis` dataset provides insights into the top-spending customers by product category, incorporating tax and shipping calculations.
 
----
+***
 
 > 💡 **Tip:** The `declare` section is a powerful tool for creating reusable and maintainable DUQL queries. Use it to define your business logic once and apply it consistently throughout your data analysis pipeline!
 
@@ -176,6 +186,7 @@ Key points about `into`:
 3. This named result can be used as a dataset in other DUQL queries within the same session or script.
 
 Example:
+
 ```yaml
 # ... previous query steps ...
 
@@ -193,7 +204,7 @@ steps:
 
 The key difference between `into` and a variable declared in the `declare` section is the timing and context:
 
-- Variables in `declare` are defined before the main query pipeline and can be used throughout the query.
-- `into` creates a named result at the end of the query pipeline, making the final result available for future use.
+* Variables in `declare` are defined before the main query pipeline and can be used throughout the query.
+* `into` creates a named result at the end of the query pipeline, making the final result available for future use.
 
 Think of `into` as a way to save your query results for further analysis or as building blocks for more complex data operations. It's particularly useful when you want to break down a complex analysis into multiple, manageable DUQL queries.

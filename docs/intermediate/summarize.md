@@ -1,4 +1,4 @@
-# DUQL Summarize
+# Summarize
 
 The `summarize` function in DUQL is used to perform aggregations on your data, condensing multiple rows into summary statistics. It can be used both as a top-level function and within the `group` function, offering flexibility in how you aggregate your data.
 
@@ -16,8 +16,9 @@ Within a `group` function:
 ```yaml
 group:
   by: <grouping_columns>
-  summarize:
-    <new_column_name>: <aggregation_function>
+  steps:
+    summarize:
+      <new_column_name>: <aggregation_function>
 ```
 
 ## Behavior
@@ -29,14 +30,7 @@ This dual behavior allows for both global summaries and group-specific summaries
 
 ## Common Aggregation Functions
 
-- `count`: Count of rows
-- `sum`: Sum of values
-- `avg`: Average of values
-- `min`: Minimum value
-- `max`: Maximum value
-- `count_distinct`: Count of unique values
-- `first`: First value in the group
-- `last`: Last value in the group
+Currently, all declared aggregation functions are `min`, `max`, `count`, `average`, `stddev`, `avg`, `sum` and `count_distinct`
 
 ## Examples
 
@@ -137,6 +131,7 @@ into: sales_performance_summary
 ```
 
 This query demonstrates:
+
 1. Filtering recent sales data
 2. Joining with product information
 3. Calculating revenue and margin
@@ -146,6 +141,6 @@ This query demonstrates:
 
 The resulting `sales_performance_summary` dataset offers both detailed monthly performance by category and overall performance metrics, showcasing the flexibility of the `summarize` function in DUQL.
 
----
+***
 
 > 💡 **Tip:** The `summarize` function is a versatile tool in DUQL. Use it at the top level for quick overall insights, or within `group` for detailed breakdowns. Combine both approaches to create comprehensive analytical queries!

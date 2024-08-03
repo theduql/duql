@@ -1,4 +1,4 @@
-# DUQL Expression
+# Expressions
 
 Expressions in DUQL are powerful constructs used to perform calculations, comparisons, and transformations on data. They are fundamental to many DUQL operations, including filtering, generating new columns, and defining conditions.
 
@@ -27,10 +27,10 @@ sql: <sql_statement>
 
 ```yaml
 case:
-  - <condition_1>: <result_1>
-  - <condition_2>: <result_2>
-  # ...
-  - true: <default_result>
+- <condition_1>: <result_1>
+- <condition_2>: <result_2>
+# ...
+- true: <default_result>
 ```
 
 ### Pipeline
@@ -46,6 +46,7 @@ case:
 Inline expressions are boolean expressions written directly in DUQL syntax. They can include column references, literals, operators, and function calls.
 
 Examples:
+
 ```yaml
 price * quantity > 1000
 date.year(order_date) == 2023
@@ -57,7 +58,12 @@ array_contains(tags, 'urgent') && status != 'completed'
 
 SQL statements allow you to use raw SQL within your DUQL queries. This is useful for complex operations or database-specific functions.
 
+{% hint style="info" %}
+You can also use the YAML `|` feature for multi-line strings
+{% endhint %}
+
 Examples:
+
 ```yaml
 sql: SELECT AVG(price) FROM products WHERE category = 'Electronics'
 
@@ -77,30 +83,33 @@ sql: |
 Case statements provide a way to express conditional logic. They consist of a series of condition-result pairs. The first condition that evaluates to true determines the result.
 
 Examples:
+
 ```yaml
 case:
-  - age < 13: "Child"
-  - age < 20: "Teenager"
-  - age < 65: "Adult"
-  - true: "Senior"
+- age < 13: "Child"
+- age < 20: "Teenager"
+- age < 65: "Adult"
+- true: "Senior"
 
 case:
-  - order_total > 1000 && is_repeat_customer: "VIP"
-  - order_total > 1000: "Big Spender"
-  - is_repeat_customer: "Loyal Customer"
-  - true: "New Customer"
+- order_total > 1000 && is_repeat_customer: "VIP"
+- order_total > 1000: "Big Spender"
+- is_repeat_customer: "Loyal Customer"
+- true: "New Customer"
 ```
 
 ### Pipelines
 
-Pipelines are a powerful feature in DUQL that allow you to chain multiple operations or functions together. They provide a clear, left-to-right reading order for complex transformations.
+Pipelines are a powerful feature in DUQL that allow you to chain multiple operations or functions together. They provide a clear, left-to-right reading order for complex transformations on a row level.
 
 Syntax:
+
 ```
 (<initial_value> | <function_1> | <function_2> | ... | <function_n>)
 ```
 
 Examples:
+
 ```yaml
 (last_name | text.lower | text.starts_with("a"))
 (age | math.pow 2)
@@ -109,15 +118,19 @@ Examples:
 ```
 
 How Pipelines Work:
+
 1. The initial value (often a column name) is passed as input to the first function.
 2. The result of each function is passed as the last argument to the next function.
 3. The final result is the output of the last function in the pipeline.
 
 For example, the pipeline:
+
 ```
 (a | foo 3 | bar 'hello' 'world' | baz)
 ```
+
 is equivalent to:
+
 ```
 baz(bar('hello', 'world', foo(3, a)))
 ```
@@ -153,11 +166,11 @@ date.add_months(subscription_start, 12) > current_date() && is_active
 
 ## Related Functions
 
-- [`filter`](filter.md): Often uses expressions to define row selection criteria.
-- [`generate`](generate.md): Uses expressions to create or modify columns.
-- [`group`](group.md): Can use expressions in summarizations and having clauses.
-- [`sort`](sort.md): May use expressions to define custom sorting logic.
+* [`filter`](filter.md): Often uses expressions to define row selection criteria.
+* [`generate`](../intermediate/generate.md): Uses expressions to create or modify columns.
+* [`group`](../intermediate/group.md): Can use expressions in summarizations and having clauses.
+* [`sort`](sort.md): May use expressions to define custom sorting logic.
 
----
+***
 
 > 💡 **Tip:** Pipelines in DUQL expressions are a powerful tool for creating clear and maintainable data transformations. They allow you to break down complex operations into a series of simple steps, making your queries easier to read and modify. Experiment with pipelines to streamline your data processing logic!

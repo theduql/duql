@@ -1,10 +1,14 @@
-# DUQL Query
+# Query Structure
 
 DUQL is a powerful and intuitive query language designed for data transformation and analysis. It provides a structured way to define complex data operations using a human-readable YAML format.
 
 ## Syntax
 
-A typical DUQL query has the following structure:
+A fully defined DUQL query has the following structure:
+
+{% hint style="info" %}
+Only `dataset` is required
+{% endhint %}
 
 ```yaml
 settings:
@@ -28,12 +32,13 @@ into: <output_destination>
 
 ### Settings
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `version` | string | No | The version of DUQL being used |
-| `target` | string | No | The target database or SQL dialect for the query |
+| Parameter | Type   | Required | Description                                      |
+| --------- | ------ | -------- | ------------------------------------------------ |
+| `version` | string | No       | The version of DUQL being used                   |
+| `target`  | string | No       | The target database or SQL dialect for the query |
 
 Example:
+
 ```yaml
 settings:
   version: '0.0.1'
@@ -45,6 +50,7 @@ settings:
 The `declare` section allows you to define variables, functions, or reusable query components.
 
 Example:
+
 ```yaml
 declare:
   active_users:
@@ -60,11 +66,12 @@ declare:
 The `dataset` component specifies the main data source for your query. It can be a simple table name or a more complex definition.
 
 Example:
+
 ```yaml
 dataset: sales_transactions
 ```
 
-or 
+or
 
 ```yaml
 dataset:
@@ -77,16 +84,18 @@ dataset:
 The `steps` section is where you define your data transformation pipeline. Each step represents an operation on your data.
 
 Available steps include:
-- `filter`: Select rows based on conditions
-- `join`: Combine data from multiple sources
-- `select`: Choose or compute columns
-- `group`: Aggregate data
-- `sort`: Order results
-- `take`: Limit the number of rows
-- `generate`: Create new columns
-- And more...
+
+* `filter`: Select rows based on conditions
+* `join`: Combine data from multiple sources
+* `select`: Choose or compute columns
+* `group`: Aggregate data
+* `sort`: Order results
+* `take`: Limit the number of rows
+* `generate`: Create new columns
+* And more...
 
 Example:
+
 ```yaml
 steps:
   - filter: date > @2023-01-01
@@ -106,6 +115,7 @@ steps:
 The `into` component specifies the destination for your query results.
 
 Example:
+
 ```yaml
 into: monthly_sales_report
 ```
@@ -133,7 +143,7 @@ declare:
   recent_customers:
     dataset: customers
     steps:
-      - filter: last_purchase > @2023-01-01
+    - filter: last_purchase > @2023-01-01
 
 dataset: orders
 
@@ -149,9 +159,10 @@ steps:
     purchase_month: date_trunc('month', order_date)
 - group:
     by: [customer_id, purchase_month, category]
-    summarize:
-      total_spent: sum total_amount
-      num_orders: count order_id
+    steps:
+    - summarize:
+        total_spent: sum total_amount
+        num_orders: count order_id
 - sort: [customer_id, purchase_month, -total_spent]
 - generate:
     customer_value:
@@ -164,6 +175,7 @@ into: customer_purchase_analysis
 ```
 
 This query:
+
 1. Defines recent customers
 2. Joins order data with customer and product information
 3. Calculates total amount per order
@@ -173,4 +185,4 @@ This query:
 
 The resulting `customer_purchase_analysis` dataset provides valuable insights into customer behavior, allowing for targeted marketing strategies and improved customer relationship management.
 
----
+***

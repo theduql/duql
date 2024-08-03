@@ -1,4 +1,8 @@
-# DUQL Group Function
+---
+coverY: 0
+---
+
+# Groups
 
 The `group` function in DUQL is a powerful tool for aggregating and analyzing data based on specified columns. It supports a wide range of operations, allowing for complex data transformations and analyses within grouped data.
 
@@ -12,24 +16,24 @@ group:
 
 ## Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `by` | string or array | Yes | Columns to group by. Can be a single column, an array of columns, or 'table.*' for all columns of a table. |
-| `additional_steps` | object | Yes (at least one) | One or more additional transformation steps to apply to the grouped data. |
+| Parameter          | Type            | Required           | Description                                                                                                 |
+| ------------------ | --------------- | ------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `by`               | string or array | Yes                | Columns to group by. Can be a single column, an array of columns, or 'table.\*' for all columns of a table. |
+| `additional_steps` | object          | Yes (at least one) | One or more additional transformation steps to apply to the grouped data.                                   |
 
 ## Additional Steps
 
 The `group` function can include any of the following steps after grouping:
 
-- `summarize`: Perform aggregations on the grouped data.
-- `filter`: Apply conditions to filter the grouped results.
-- `generate`: Create new columns based on grouped data.
-- `join`: Join the grouped data with another dataset.
-- `select`: Choose specific columns from the grouped results.
-- `sort`: Order the grouped results.
-- `take`: Limit the number of grouped results returned.
-- `window`: Perform window functions on the grouped data.
-- `loop`: Perform iterative operations on the grouped data.
+* `summarize`: Perform aggregations on the grouped data.
+* `filter`: Apply conditions to filter the grouped results.
+* `generate`: Create new columns based on grouped data.
+* `join`: Join the grouped data with another dataset.
+* `select`: Choose specific columns from the grouped results.
+* `sort`: Order the grouped results.
+* `take`: Limit the number of grouped results returned.
+* `window`: Perform window functions on the grouped data.
+* `loop`: Perform iterative operations on the grouped data.
 
 ## Examples
 
@@ -38,32 +42,16 @@ The `group` function can include any of the following steps after grouping:
 ```yaml
 group:
   by: department
-  summarize:
-    avg_salary: average salary
-    employee_count: count employee_id
-  filter: avg_salary > 50000
-  sort: -avg_salary
-  take: 5
+  steps:
+  - summarize:
+      avg_salary: average salary
+      employee_count: count employee_id
+  - filter: avg_salary > 50000
+  - sort: -avg_salary
+  - take: 5
 ```
 
 This example groups employees by department, calculates average salary and employee count, filters for departments with high average salaries, sorts by average salary descending, and takes the top 5 results.
-
-### Advanced Grouping with Window Functions
-
-```yaml
-group:
-  by: [department, job_title]
-  window:
-    salary_rank:
-      function: rank
-      over:
-        partition: [department]
-        sort: -salary
-  filter: salary_rank <= 3
-  sort: [department, job_title, salary_rank]
-```
-
-This query ranks employees within each department based on salary, then filters for the top 3 salaries in each department.
 
 ### Time-based Analysis with Custom Metrics
 
@@ -130,17 +118,17 @@ This complex example calculates daily sales by store, computes a 7-day moving av
 
 ## Related Functions
 
-- [`summarize`](summarize.md): Often used within `group` to perform aggregations.
-- [`filter`](filter.md): Can be used before or after grouping to refine the dataset.
-- [`generate`](generate.md): Useful for creating new columns based on grouped data.
-- [`window`](window.md): Enables advanced analytical functions within grouped data.
+* [`summarize`](summarize.md): Often used within `group` to perform aggregations.
+* [`filter`](../basic/filter.md): Can be used before or after grouping to refine the dataset.
+* [`generate`](generate.md): Useful for creating new columns based on grouped data.
+* [`window`](../advanced/window.md): Enables advanced analytical functions within grouped data.
 
 ## Limitations and Considerations
 
-- Grouping operations can be computationally expensive on large datasets. Use indexing strategies on grouping columns when possible.
-- Be mindful of the order of operations within the `group` function, as it can affect the final results.
-- Some combinations of steps might not be logically valid or may produce unexpected results. Always test your queries thoroughly.
+* Grouping operations can be computationally expensive on large datasets. Use indexing strategies on grouping columns when possible.
+* Be mindful of the order of operations within the `group` function, as it can affect the final results.
+* Some combinations of steps might not be logically valid or may produce unexpected results. Always test your queries thoroughly.
 
----
+***
 
 > 💡 **Tip:** The `group` function is the cornerstone of data analysis in DUQL. By combining it with various additional steps, you can perform complex aggregations, transformations, and analyses all within a single, readable query structure. Experiment with different combinations to unlock deeper insights from your data!

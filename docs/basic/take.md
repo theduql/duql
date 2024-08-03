@@ -1,4 +1,4 @@
-# DUQL Take
+# Take
 
 The `take` function in DUQL is used to limit the number of rows returned or to select specific ranges of rows. It's useful for pagination, sampling, or selecting top/bottom N rows.
 
@@ -10,15 +10,15 @@ take: <number_or_range>
 
 ## Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `take` | integer or string | Yes | Number of rows to take or a range specification |
+| Parameter | Type              | Required | Description                                     |
+| --------- | ----------------- | -------- | ----------------------------------------------- |
+| `take`    | integer or string | Yes      | Number of rows to take or a range specification |
 
 ## Behavior
 
-- When given an integer, it returns that many rows from the beginning of the dataset.
-- When given a range, it returns the specified range of rows.
-- Can be used after sorting to get top/bottom N rows.
+* When given an integer, it returns that many rows from the beginning of the dataset.
+* When given a range, it returns the specified range of rows.
+* Can be used after sorting to get top/bottom N rows.
 
 ## Examples
 
@@ -75,9 +75,10 @@ steps:
     revenue: price * quantity
 - group:
     by: [product_id, product_name, category]
-    summarize:
-      total_revenue: sum(revenue)
-      units_sold: sum(quantity)
+    steps:
+    - summarize:
+          total_revenue: sum(revenue)
+          units_sold: sum(quantity)
 - sort: -total_revenue
 - take: 20  # Top 20 products by revenue
 - generate:
@@ -89,6 +90,7 @@ into: top_selling_products
 ```
 
 This query demonstrates:
+
 1. Joining sales data with product information
 2. Calculating revenue
 3. Grouping and summarizing by product
@@ -98,6 +100,6 @@ This query demonstrates:
 
 The `take: 20` step ensures that we only get the top 20 selling products, making the analysis more focused and manageable.
 
----
+***
 
 > 💡 **Tip:** Use the `take` function judiciously to control the size of your query results. It's particularly useful in combination with sorting to get top N or bottom N results quickly!
