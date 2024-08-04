@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "join.s.duql.json",
+  "title": "DUQL Join Function",
+  "description": "The join function in DUQL is used to combine rows from two or more tables based on a related column between them.\nIt supports different types of joins and allows for complex join conditions.\n",
+  "type": "object",
+  "properties": {
+    "join": {
+      "title": "Join Operation",
+      "type": "object",
+      "properties": {
+        "dataset": {
+          "title": "Join Dataset",
+          "$ref": "dataset.s.duql.json",
+          "description": "Specifies the dataset to join with. This can be a table name, file path, or a subquery.\nGotcha: Ensure the joined dataset has a column that can be related to the main dataset.\n"
+        },
+        "where": {
+          "title": "Join Condition",
+          "type": "string",
+          "description": "Defines the join condition. This is typically an equality comparison between columns from both datasets.\nCan use '==' shorthand for equality joins on matching column names.\nExample: \"orders.customer_id == customers.id\"\nGotcha: Complex join conditions may impact query performance.\n"
+        },
+        "retain": {
+          "title": "Join Type",
+          "type": "string",
+          "enum": [
+            "inner",
+            "left",
+            "right",
+            "full"
+          ],
+          "default": "inner",
+          "description": "Specifies the type of join to perform:\n- inner: Returns only the matched rows (default)\n- left: Returns all rows from the left table and matched rows from the right table\n- right: Returns all rows from the right table and matched rows from the left table\n- full: Returns all rows when there is a match in either left or right table\nGotcha: Different join types can significantly affect the result set size and query performance.\n"
+        }
+      },
+      "required": [
+        "dataset",
+        "where"
+      ],
+      "additionalProperties": false,
+      "description": "Defines the join operation. Must include 'dataset' and 'where' properties, and can optionally include 'retain'.\nGotcha: The order of joins in a query can affect the final result and query performance.\n"
+    }
+  },
+  "required": [
+    "join"
+  ],
+  "examples": [
+    {
+      "join": {
+        "dataset": "customers",
+        "where": "orders.customer_id == customers.id"
+      }
+    },
+    {
+      "join": {
+        "dataset": "products",
+        "where": "orders.product_id == products.id",
+        "retain": "left"
+      }
+    },
+    {
+      "join": {
+        "dataset": "myorg/employee_data.csv",
+        "where": "departments.department_id == employee_data.department_id",
+        "retain": "inner"
+      }
+    },
+    {
+      "join": {
+        "dataset": "recent_inventory",
+        "where": "products.product_id == recent_inventory.product_id",
+        "retain": "full"
+      }
+    },
+    {
+      "join": {
+        "dataset": "sql\"\"\"SELECT * FROM myexample\"\"\"",
+        "where": "==id",
+        "retain": "full"
+      }
+    },
+    {
+      "join": {
+        "dataset": "hdfs://cluster/user_profiles/*.parquet",
+        "where": "users.id == user_profiles.user_id",
+        "retain": "left"
+      }
+    }
+  ]
+}

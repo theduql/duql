@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://duql.dev/schema/filter.s.duql.yml
+$id: filter.s.duql.json
 title: DUQL Filter Function
 description: |
   The filter function in DUQL is used to select rows from a dataset based on specified conditions.
@@ -8,7 +8,7 @@ description: |
 type: object
 properties:
   filter:
-    $ref: 'expression.s.duql.yml'
+    $ref: 'expression.s.duql.json'
 required: [filter]
 additionalProperties: false
 

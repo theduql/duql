@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://duql.dev/schema/generate.s.duql.yml
+$id: generate.s.duql.json
 title: DUQL Generate Function
 description: |
   The generate function in DUQL is used to create new columns or modify existing ones.
@@ -13,7 +13,7 @@ properties:
       oneOf:
         - type: string
           description: Simple expression or column reference.
-        - $ref: 'expression.s.duql.yml'
+        - $ref: 'expression.s.duql.json'
         - type: object
           properties:
             case:
@@ -22,12 +22,12 @@ properties:
                 type: object
                 properties:
                   when:
-                    $ref: 'expression.s.duql.yml'
+                    $ref: 'expression.s.duql.json'
                   then:
                     oneOf:
                       - type: string
                       - type: number
-                      - $ref: 'expression.s.duql.yml'
+                      - $ref: 'expression.s.duql.json'
                 required: [when, then]
               minItems: 1
           required: [case]
@@ -36,34 +36,3 @@ properties:
     description: Key-value pairs where keys are new column names and values are expressions.
 required: [generate]
 additionalProperties: false
-
-examples:
-  - generate:
-      full_name: f"{first_name} {last_name}"
-      age: datediff(years, birth_date, current_date())
-  - generate:
-      discount:
-        case:
-          - when: total_purchases > 1000
-            then: 0.15
-          - when: total_purchases > 500
-            then: 0.10
-          - when: total_purchases > 100
-            then: 0.05
-          - when: true
-            then: 0
-  - generate:
-      clean_text: sql"REGEXP_REPLACE(LOWER(text), '[^a-z0-9 ]', '')"
-  - generate:
-      revenue: price * quantity
-      profit_margin: (revenue - cost) / revenue * 100
-      performance:
-        case:
-          - when: profit_margin > 30
-            then: "Excellent"
-          - when: profit_margin > 20
-            then: "Good"
-          - when: profit_margin > 10
-            then: "Average"
-          - when: true
-            then: "Poor"

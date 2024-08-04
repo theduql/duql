@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "declare.s.duql.json",
+  "title": "DUQL Variable Declaration",
+  "description": "Defines variable declarations in DUQL. These declarations can include simple aliases,\ncomplex expressions, function definitions, pipelines, and tuples.\nDeclarations are used to create reusable components within DUQL queries.\n",
+  "type": "object",
+  "propertyNames": {
+    "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+    "description": "Variable names must start with a letter or underscore, followed by letters, numbers, or underscores."
+  },
+  "patternProperties": {
+    "^[a-zA-Z_][a-zA-Z0-9_]*$": {
+      "oneOf": [
+        {
+          "$ref": "steps.s.duql.json",
+          "title": "Pipeline Declaration",
+          "description": "Defines a reusable pipeline of operations."
+        },
+        {
+          "$ref": "expression.s.duql.json",
+          "title": "Simple Expression or Function Definition",
+          "description": "A simple expression or a function definition in string form.",
+          "examples": [
+            "x -> x * 2",
+            "low:0 high x -> (x - low) / (high - low)"
+          ]
+        },
+        {
+          "type": "object",
+          "title": "Tuple Declaration",
+          "description": "Defines a tuple (essentially an ad-hoc table).",
+          "additionalProperties": true,
+          "examples": [
+            {
+              "x": 2,
+              "y": 3
+            },
+            {
+              "name": "John",
+              "age": 30
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "title": "Function Definition",
+          "description": "Detailed function definition with parameters and expression.",
+          "properties": {
+            "parameters": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "default": {
+                        "type": [
+                          "string",
+                          "number",
+                          "boolean",
+                          "null"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ]
+                  }
+                ]
+              },
+              "description": "List of parameters, optionally with default values."
+            },
+            "expression": {
+              "$ref": "expression.s.duql.json",
+              "description": "The function body as an expression."
+            }
+          },
+          "required": [
+            "parameters",
+            "expression"
+          ]
+        },
+        {
+          "$ref": "expression.s.duql.json",
+          "title": "Complex Expression",
+          "description": "A complex expression using DUQL's expression syntax."
+        }
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "tax_rate": 0.08
+    },
+    {
+      "calculate_total": "price quantity -> price * quantity * (1 + tax_rate)"
+    },
+    {
+      "point": {
+        "x": 10,
+        "y": 20
+      }
+    },
+    {
+      "is_adult": {
+        "parameters": [
+          {
+            "name": "age"
+          },
+          {
+            "name": "country",
+            "default": "US"
+          }
+        ],
+        "expression": {
+          "case": [
+            {
+              "when": "country == \"US\"",
+              "then": "age >= 21"
+            },
+            {
+              "when": true,
+              "then": "age >= 18"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "active_users": {
+        "dataset": "users",
+        "steps": [
+          {
+            "filter": "last_login > current_date() - interval '30 days'"
+          },
+          {
+            "select": [
+              "id",
+              "name",
+              "email"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

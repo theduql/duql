@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://duql.dev/schema/sort.s.duql.yml
+$id: sort.s.duql.json
 title: DUQL Sort Function
 description: |
   The sort function in DUQL is used to specify the order of rows in the output.

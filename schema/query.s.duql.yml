@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://duql.dev/schema/duql.schema.yml
+$id: query.s.duql.json
 title: DUQL Query Schema
 description: |
   The complete schema for DUQL queries.
@@ -8,23 +8,23 @@ description: |
 type: object
 properties:
   settings:
-    $ref: 'settings.s.duql.yml'
+    $ref: 'settings.s.duql'
     title: Query Settings
     description: Metadata and configuration options for the DUQL query.
   declare:
-    $ref: 'declare.s.duql.yml'
+    $ref: 'declare.s.duql'
     title: Variable Declarations
     description: Defines reusable variables, functions, or query components.
   dataset: 
-    $ref: 'dataset.s.duql.yml'
+    $ref: 'dataset.s.duql'
     title: Main Dataset
     description: Specifies the primary data source for the query.
   steps:
-    $ref: 'steps.s.duql.yml'
+    $ref: 'steps.s.duql'
     title: Transformation Steps
     description: Defines the sequence of operations to be performed on the data.
   into:
-    $ref: 'into.s.duql.yml'
+    $ref: 'into.s.duql'
     title: Output Destination
     description: Specifies the destination for the query results.
 required: [dataset]

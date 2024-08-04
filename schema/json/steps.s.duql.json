@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "steps.s.duql.json",
+  "title": "DUQL Steps Pipeline",
+  "description": "Defines the sequence of operations to be performed on the data in a DUQL query.\nEach step represents a transformation or action applied to the dataset.\nSteps are executed in the order they appear in the array.\n",
+  "type": "object",
+  "properties": {
+    "steps": {
+      "type": "array",
+      "items": {
+        "title": "Pipeline Step",
+        "type": "object",
+        "oneOf": [
+          {
+            "$ref": "filter.s.duql.json"
+          },
+          {
+            "$ref": "generate.s.duql.json"
+          },
+          {
+            "$ref": "group.s.duql.json"
+          },
+          {
+            "$ref": "join.s.duql.json"
+          },
+          {
+            "$ref": "select.s.duql.json"
+          },
+          {
+            "$ref": "sort.s.duql.json"
+          },
+          {
+            "$ref": "take.s.duql.json"
+          },
+          {
+            "$ref": "window.s.duql.json"
+          },
+          {
+            "$ref": "loop.s.duql.json"
+          }
+        ],
+        "description": "A single step in the DUQL query pipeline. Each step can be one of the following operations in any order:\n- filter: Select rows based on conditions\n- generate: Create new columns or modify existing ones\n- group: Aggregate data\n- join: Combine data from multiple sources\n- select: Choose or compute columns\n- sort: Order results\n- take: Limit the number of rows\n- window: Perform window functions\n- append: Combine datasets by adding rows\n- remove: Exclude specific rows or subsets\n- intersect: Find common rows between datasets\n- distinct: Remove duplicate rows\n- union: Combine datasets, removing duplicates\n- except: Find rows in one dataset but not in another\n- loop: Perform iterative processing\nGotcha: The order of steps can significantly affect the query results and performance.\n"
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "steps"
+  ],
+  "examples": {
+    "steps": [
+      {
+        "filter": "order_date >= @2023-01-01"
+      },
+      {
+        "join": {
+          "dataset": "customers",
+          "where": "orders.customer_id == customers.id"
+        }
+      },
+      {
+        "generate": {
+          "total_amount": "price * quantity"
+        }
+      },
+      {
+        "group": {
+          "by": [
+            "customer_id",
+            "customers.name"
+          ],
+          "summarize": {
+            "total_spent": "sum(total_amount)",
+            "order_count": "count(order_id)"
+          }
+        }
+      },
+      {
+        "sort": "-total_spent"
+      },
+      {
+        "take": 10
+      }
+    ]
+  }
+}

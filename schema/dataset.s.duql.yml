@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://duql.dev/schema/dataset.s.duql.yml
+$id: dataset.s.duql.json
 title: DUQL Dataset
 description: |
   Defines the source of data for a DUQL query. 

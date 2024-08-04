@@ -41,7 +41,11 @@
     - Validating a query and understanding how it works has never been easier.
 
 ## Install
-> Coming Soon
+### macOS
+
+
+### Linux
+bash`curl -fsSL https://raw.githubusercontent.com/theduql/duql/main/install.sh | sh`
 
 ## Writing / Editing
 > [!NOTE]  

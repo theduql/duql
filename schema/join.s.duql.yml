@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://duql.dev/schema/join.s.duql.yml
+$id: join.s.duql.json
 title: DUQL Join Function
 description: |
   The join function in DUQL is used to combine rows from two or more tables based on a related column between them.
@@ -12,7 +12,7 @@ properties:
     properties:
       dataset:
         title: Join Dataset
-        $ref: 'dataset.s.duql.yml'
+        $ref: 'dataset.s.duql.json'
         description: |
           Specifies the dataset to join with. This can be a table name, file path, or a subquery.
           Gotcha: Ensure the joined dataset has a column that can be related to the main dataset.
@@ -36,14 +36,11 @@ properties:
           - right: Returns all rows from the right table and matched rows from the left table
           - full: Returns all rows when there is a match in either left or right table
           Gotcha: Different join types can significantly affect the result set size and query performance.
-      steps:
-        title: Preprocessing Steps
-        $ref: 'steps.s.duql.yml'
-        description: |
-          Optional preprocessing steps to apply to the joined dataset before the join operation.
-          Gotcha: Complex preprocessing can impact join performance.
     required: [dataset, where]
     additionalProperties: false
+    description: |
+      Defines the join operation. Must include 'dataset' and 'where' properties, and can optionally include 'retain'.
+      Gotcha: The order of joins in a query can affect the final result and query performance.
 required: [join]
 
 examples:
@@ -63,23 +60,8 @@ examples:
 
   - join:
       dataset: recent_inventory
-      steps:
-      - dataset: inventory
-      - filter: last_updated > @2023-01-01
       where: products.product_id == recent_inventory.product_id
       retain: full
-
-  - join:
-      dataset: customer_views
-      steps:
-      - dataset: product_views
-      - filter: view_date >= @2023-01-01
-      - group:
-          by: [customer_id]
-          summarize:
-            total_views: count this
-            unique_products_viewed: count_distinct product_id
-      where: customers.id == customer_views.customer_id
 
   - join:
       dataset: sql"""SELECT * FROM myexample"""

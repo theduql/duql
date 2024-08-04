@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summarize.s.duql.json",
+  "title": "DUQL Summarize Function",
+  "description": "The summarize function in DUQL is used to perform aggregations on data, condensing multiple rows into summary statistics.\nIt can be used both as a top-level function and within the group function, offering flexibility in how you aggregate your data.\n",
+  "type": "object",
+  "properties": {
+    "summarize": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "case": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "when": {
+                      "$ref": "expression.s.duql.json"
+                    },
+                    "then": {
+                      "$ref": "expression.s.duql.json"
+                    }
+                  },
+                  "required": [
+                    "when",
+                    "then"
+                  ]
+                },
+                "minItems": 1
+              }
+            },
+            "required": [
+              "case"
+            ]
+          }
+        ]
+      },
+      "minProperties": 1,
+      "description": "Key-value pairs where keys are new column names and values are aggregation functions or expressions.\nSupports common aggregation functions like min, max, count, average, stddev, avg, sum, and count_distinct.\nComplex expressions and case statements are also supported.\n"
+    }
+  },
+  "required": [
+    "summarize"
+  ],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "summarize": {
+        "total_revenue": "sum amount",
+        "average_order_value": "avg amount",
+        "order_count": "count order_id",
+        "unique_customers": "count_distinct customer_id"
+      }
+    },
+    {
+      "summarize": {
+        "max_temperature": "max temperature",
+        "min_temperature": "min temperature",
+        "avg_humidity": "average humidity",
+        "total_rainfall": "sum rainfall"
+      }
+    },
+    {
+      "summarize": {
+        "high_value_orders": {
+          "case": [
+            {
+              "when": "amount > 1000",
+              "then": "count order_id"
+            },
+            {
+              "when": true,
+              "then": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "summarize": {
+        "total_sales": "sum(price * quantity)",
+        "average_unit_price": "avg price",
+        "bestseller": "mode product_name",
+        "sales_variance": "stddev(price * quantity)"
+      }
+    },
+    {
+      "summarize": {
+        "median_age": "median age",
+        "age_range": "max(age) - min(age)",
+        "total_participants": "count id",
+        "completion_rate": "avg(case when status == 'completed' then 1 else 0)"
+      }
+    }
+  ]
+}

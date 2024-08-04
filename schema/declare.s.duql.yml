@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://duql.dev/schema/declare.s.duql.yml
+$id: declare.s.duql.json
 title: DUQL Variable Declaration
 description: |
   Defines variable declarations in DUQL. These declarations can include simple aliases,
@@ -12,10 +12,10 @@ propertyNames:
 patternProperties:
   ^[a-zA-Z_][a-zA-Z0-9_]*$:
     oneOf:
-      - $ref: 'pipeline.s.duql.yml'
+      - $ref: 'steps.s.duql.json'
         title: Pipeline Declaration
         description: Defines a reusable pipeline of operations.
-      - type: string
+      - $ref: 'expression.s.duql.json'
         title: Simple Expression or Function Definition
         description: A simple expression or a function definition in string form.
         examples:
@@ -46,10 +46,10 @@ patternProperties:
                   required: [name]
             description: List of parameters, optionally with default values.
           expression:
-            $ref: 'expression.s.duql.yml'
+            $ref: 'expression.s.duql.json'
             description: The function body as an expression.
         required: [parameters, expression]
-      - $ref: 'expression.s.duql.yml'
+      - $ref: 'expression.s.duql.json'
         title: Complex Expression
         description: A complex expression using DUQL's expression syntax.
 additionalProperties: false

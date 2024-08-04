@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dataset.s.duql.json",
+  "title": "DUQL Dataset",
+  "description": "Defines the source of data for a DUQL query. \nThis can be a table name, a file path, a SQL query, or a complex query with its own steps.\nThe dataset is the starting point for all DUQL queries and determines what data will be processed.\n",
+  "oneOf": [
+    {
+      "title": "Dataset (simple)",
+      "type": "string",
+      "description": "A simple string representation of the data source. This can be:\n- A table name (e.g., \"users\")\n- A file path with extension (e.g., \"data/sales.csv\")\n- A SQL query using the sql\"\"\" syntax (e.g., sql\"\"\"SELECT * FROM users;\"\"\")\nGotcha: When using file paths, ensure they are relative to the query execution context or provide absolute paths.\n"
+    },
+    {
+      "title": "Dataset (advanced)",
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Dataset Name",
+          "type": "string",
+          "description": "The identifier for the dataset. This can be:\n- A table name\n- A file path (with extension)\n- A SQL query\n- An alias for a subquery\nGotcha: Ensure the name is unique within your query context to avoid conflicts.\n"
+        },
+        "format": {
+          "title": "Data Format",
+          "type": "string",
+          "enum": [
+            "table",
+            "csv",
+            "json",
+            "parquet"
+          ],
+          "default": "table",
+          "description": "Specifies the format of the data source. Options are:\n- table: A database table (default)\n- csv: Comma-separated values file\n- json: JSON file or data\n- parquet: Apache Parquet file\nGotcha: The 'table' format assumes the data source is a database table. For file-based sources, explicitly specify the format.\n"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    }
+  ],
+  "examples": [
+    "customers",
+    "sql\"SELECT * FROM orders WHERE date > '2023-01-01'\"",
+    "/path/to/data/sales_2023.csv",
+    {
+      "name": "transactions",
+      "format": "table"
+    },
+    {
+      "name": "/data/logs/app_logs_*.json",
+      "format": "json"
+    },
+    {
+      "name": "s3://my-bucket/analytics/user_behavior.parquet",
+      "format": "parquet"
+    },
+    {
+      "name": "sql'WITH recent_orders AS (\n  SELECT * FROM orders\n  WHERE order_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)\n)\nSELECT c.customer_id, c.name, COUNT(o.order_id) as order_count\nFROM customers c\nLEFT JOIN recent_orders o ON c.customer_id = o.customer_id\nGROUP BY c.customer_id, c.name'\n",
+      "format": "table"
+    }
+  ]
+}

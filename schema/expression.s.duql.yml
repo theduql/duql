@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://duql.dev/schema/expression.s.duql.yml
+$id: expression.s.duql.json
 title: DUQL Expression
 description: |
   Defines expressions in DUQL, including inline expressions, SQL statements, case statements, and pipelines.

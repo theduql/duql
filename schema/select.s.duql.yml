@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://duql.dev/schema/select.s.duql.yml
+$id: select.s.duql
 title: DUQL Select Function
 description: |
   The select function in DUQL is used to specify which columns to include in the output.

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "group.s.duql.json",
+  "title": "DUQL Group Function",
+  "description": "The group function in DUQL is used to aggregate data based on specified columns.\nIt supports grouping by single or multiple columns, all columns from a table,\nvarious aggregation functions, sorting of results, and limiting the number of rows returned.\n",
+  "type": "object",
+  "properties": {
+    "group": {
+      "title": "Group Operation",
+      "type": "object",
+      "properties": {
+        "by": {
+          "title": "Grouping Columns",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "Specifies the columns to group by. This can be:\n- A single column name (e.g., \"department\")\n- An array of column names (e.g., [\"year\", \"month\", \"category\"])\n- 'table.*' to group by all columns of a table\nGotcha: Grouping by too many columns can lead to performance issues and may not provide meaningful aggregations.\n"
+        }
+      },
+      "required": [
+        "by"
+      ],
+      "allOf": [
+        {
+          "$ref": "steps.s.duql.json"
+        }
+      ],
+      "description": "Defines the grouping operation. Must include a 'by' property and can include additional\nsteps like summarize, filter, generate, etc.\nGotcha: The order of steps within the group operation can affect the final result.\n"
+    }
+  },
+  "required": [
+    "group"
+  ],
+  "examples": {
+    "group": {
+      "by": [
+        "department",
+        "job_title"
+      ],
+      "steps": [
+        {
+          "summarize": {
+            "avg_salary": "average salary",
+            "employee_count": "count employee_id"
+          }
+        },
+        {
+          "filter": "avg_salary > 50000"
+        },
+        {
+          "sort": "-avg_salary"
+        },
+        {
+          "take": 5
+        }
+      ]
+    }
+  }
+}

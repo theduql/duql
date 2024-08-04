@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sort.s.duql.json",
+  "title": "DUQL Sort Function",
+  "description": "The sort function in DUQL is used to specify the order of rows in the output.\nIt supports sorting by multiple columns, in ascending or descending order,\nand can use complex expressions for sorting criteria.\n",
+  "type": "object",
+  "properties": {
+    "sort": {
+      "title": "Sort Operation",
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "A single column name or expression to sort by.\nPrefix with '-' for descending order.\nExample: \"-age\" (sort by age in descending order)\nGotcha: Sorting by a nullable column may place NULL values first or last depending on the database.\n"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "An array of column names or expressions to sort by.\nPrefix individual items with '-' for descending order.\nExample: [\"department\", \"-salary\"] (sort by department ascending, then salary descending)\nGotcha: The order of columns in the array determines the priority of the sort.\n"
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "An object mapping column aliases to sort expressions.\nUse this for complex sorting logic or when you need to rename columns in the output.\nExample: {\"Total Amount\": \"-order_total\", \"Customer Name\": \"customers.name\"}\n"
+        }
+      ],
+      "description": "Specifies the sorting criteria. Can be a single column name, an array of column names,\nor an object for more complex sorting. Use '-' prefix for descending order.\nGotcha: Sorting can be computationally expensive on large datasets, especially when using complex expressions.\n"
+    }
+  },
+  "required": [
+    "sort"
+  ],
+  "examples": [
+    {
+      "sort": "last_name"
+    },
+    {
+      "sort": "-age"
+    },
+    {
+      "sort": [
+        "department",
+        "-salary"
+      ]
+    },
+    {
+      "sort": [
+        "last_name",
+        "first_name",
+        "-hire_date"
+      ]
+    },
+    {
+      "sort": {
+        "Order Date": "order_date",
+        "Total Amount": "-order_total"
+      }
+    },
+    {
+      "sort": [
+        "category",
+        "-sum(sales_amount)"
+      ]
+    },
+    {
+      "sort": "sql\"CASE WHEN status = 'urgent' THEN 0 ELSE 1 END, created_at DESC\""
+    },
+    {
+      "sort": [
+        "country",
+        "-state",
+        "city",
+        "street_name",
+        "house_number"
+      ]
+    },
+    {
+      "sort": [
+        "year(date)",
+        "-quarter(date)",
+        "month(date)"
+      ]
+    },
+    {
+      "sort": {
+        "Priority": {
+          "case": [
+            {
+              "status == 'critical'": 1
+            },
+            {
+              "status == 'high'": 2
+            },
+            {
+              "status == 'medium'": 3
+            },
+            {
+              "true": 4
+            }
+          ]
+        },
+        "Created Date": "created_at"
+      }
+    }
+  ]
+}

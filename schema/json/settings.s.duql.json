@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "settings.s.duql",
+  "title": "DUQL Query Settings",
+  "description": "Metadata and configuration options for DUQL queries",
+  "type": "object",
+  "properties": {
+    "version": {
+      "title": "DUQL Version",
+      "type": "string",
+      "description": "The version of DUQL being used"
+    },
+    "target": {
+      "title": "DUQL Target",
+      "type": "string",
+      "description": "The target database or SQL dialect for the query",
+      "enum": [
+        "sql.clickhouse",
+        "sql.duckdb",
+        "sql.generic",
+        "sql.glaredb",
+        "sql.mysql",
+        "sql.postgres",
+        "sql.sqlite"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "version": "0.0.1",
+      "target": "sql.clickhouse"
+    },
+    {
+      "version": "0.0.2",
+      "target": "sql.glaredb"
+    },
+    {
+      "version": "0.0.1",
+      "target": "sql.duckdb"
+    },
+    {
+      "version": "0.0.3",
+      "target": "sql.mysql"
+    },
+    {
+      "version": "0.0.2",
+      "target": "sql.sqlite"
+    }
+  ]
+}

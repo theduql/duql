@@ -15,7 +15,7 @@ join:
 
 | Parameter | Type   | Required | Default   | Description                                            |
 | --------- | ------ | -------- | --------- | ------------------------------------------------------ |
-| `dataset` | object | Yes      | -         | The data source to join with (ref: dataset.s.duql.yml) |
+| `dataset` | object | Yes      | -         | The data source to join with (ref: dataset.s.duql.json) |
 | `where`   | string | Yes      | -         | The join condition                                     |
 | `retain`  | string | No       | `"inner"` | The type of join to perform                            |
 

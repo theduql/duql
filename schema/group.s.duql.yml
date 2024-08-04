@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://duql.dev/schema/group.s.duql.yml
+$id: group.s.duql.json
 title: DUQL Group Function
 description: |
   The group function in DUQL is used to aggregate data based on specified columns.
@@ -26,7 +26,7 @@ properties:
           Gotcha: Grouping by too many columns can lead to performance issues and may not provide meaningful aggregations.
     required: [by]
     allOf:
-      - $ref: steps.s.duql.yml
+      - $ref: steps.s.duql.json
     description: |
       Defines the grouping operation. Must include a 'by' property and can include additional
       steps like summarize, filter, generate, etc.
@@ -34,64 +34,12 @@ properties:
 required: [group]
 
 examples:
-- group:
-    by: department
-    summarize:
-      avg_salary: average salary
-      employee_count: count employee_id
-    filter: avg_salary > 50000
-    sort: -avg_salary
-    take: 5
-
-- group:
-    by: [year(order_date), customer_id]
-    summarize:
-      total_spent: sum order_total
-      order_count: count order_id
-    generate:
-      avg_order_value: total_spent / order_count
-    filter: order_count > 10
-    sort: [year(order_date), -total_spent]
-
-- group:
-    by: product_category
-    summarize:
-      revenue: sum sales_amount
-      cost: sum product_cost
-    generate:
-      profit_margin: (revenue - cost) / revenue * 100
-    sort: -profit_margin
-    take: 10
-
-- group:
-    by: customer_id
-    generate:
-      last_purchase_date: max(order_date)
-      total_purchases: count(order_id)
-      favorite_category: mode(product_category)
-    filter: total_purchases > 5
-    sort: -last_purchase_date
-    take: 100
-
-- group:
+  group:
     by: [department, job_title]
-    window:
-      salary_rank:
-        function: rank
-        over:
-          partition: [department]
-          sort: -salary
-    filter: salary_rank <= 3
-    sort: [department, job_title, salary_rank]
-
-- group:
-    by: [year(transaction_date), month(transaction_date)]
-    generate:
-      monthly_revenue: sum(transaction_amount)
-    window:
-      revenue_growth:
-        function: (monthly_revenue - lag(monthly_revenue)) / lag(monthly_revenue) * 100
-        over:
-          sort: [year(transaction_date), month(transaction_date)]
-    filter: revenue_growth < 0
-    sort: [year(transaction_date), month(transaction_date)]
+    steps:
+    - summarize:
+        avg_salary: average salary
+        employee_count: count employee_id
+    - filter: avg_salary > 50000
+    - sort: -avg_salary
+    - take: 5

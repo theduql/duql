@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://duql.dev/schema/into.s.duql.yml
+$id: into.s.duql.json
 title: DUQL Into Statement
 description: |
   Defines the destination for the query results dataset a DUQL query.

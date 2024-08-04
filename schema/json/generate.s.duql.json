@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "generate.s.duql.json",
+  "title": "DUQL Generate Function",
+  "description": "The generate function in DUQL is used to create new columns or modify existing ones.\nIt supports various expressions, calculations, conditional logic, and SQL functions\nto derive new values based on existing data.\n",
+  "type": "object",
+  "properties": {
+    "generate": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string",
+            "description": "Simple expression or column reference."
+          },
+          {
+            "$ref": "expression.s.duql.json"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "case": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "when": {
+                      "$ref": "expression.s.duql.json"
+                    },
+                    "then": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "$ref": "expression.s.duql.json"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "when",
+                    "then"
+                  ]
+                },
+                "minItems": 1
+              }
+            },
+            "required": [
+              "case"
+            ],
+            "description": "Case statement for conditional logic."
+          }
+        ]
+      },
+      "minProperties": 1,
+      "description": "Key-value pairs where keys are new column names and values are expressions."
+    }
+  },
+  "required": [
+    "generate"
+  ],
+  "additionalProperties": false
+}

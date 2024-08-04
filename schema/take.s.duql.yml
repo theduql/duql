@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://duql.dev/schema/take.s.duql.yml
+$id: take.s.duql.json
 title: DUQL Take Function
 description: |
   The take function in DUQL is used to limit the number of rows returned or to select

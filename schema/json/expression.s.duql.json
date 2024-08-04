@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "expression.s.duql.json",
+  "title": "DUQL Expression",
+  "description": "Defines expressions in DUQL, including inline expressions, SQL statements, case statements, and pipelines.\nExpressions can be used in various contexts such as filtering, generating new columns, and defining conditions.\n",
+  "oneOf": [
+    {
+      "type": "string",
+      "title": "Inline Expression",
+      "description": "An inline boolean expression using DUQL syntax, which may include pipeline notation."
+    },
+    {
+      "type": "object",
+      "title": "SQL Statement",
+      "properties": {
+        "sql": {
+          "type": "string",
+          "description": "Raw SQL statement to be executed."
+        }
+      },
+      "required": [
+        "sql"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "title": "Case Statement",
+      "properties": {
+        "case": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "minProperties": 1,
+            "maxProperties": 1
+          },
+          "minItems": 1,
+          "description": "A series of condition-result pairs. The first condition that evaluates to true\ndetermines the result. The last condition is often 'true' to provide a default result.\n"
+        }
+      },
+      "required": [
+        "case"
+      ],
+      "additionalProperties": false
+    }
+  ],
+  "examples": [
+    "price * quantity > 1000",
+    "date.year(order_date) == 2023",
+    "lower(email) ~= \"^[a-z0-9._%+-]+@[a-z0-9.-]+\\\\.[a-z]{2,}$\"",
+    "array_contains(tags, 'urgent') && status != 'completed'",
+    "date.diff_days(current_date(), ship_date) <= 3",
+    "sqrt(latitude^2 + longitude^2) < 10",
+    "(last_name | text.lower | text.starts_with('a'))",
+    "(age | math.pow 2)",
+    "(invoice_date | date.to_text '%d/%m/%Y')",
+    "(customer_data | json.extract 'preferences' | json.extract 'theme' | text.lower | text.equals 'dark')",
+    "(order_total | math.round 2 | math.gt 1000)",
+    {
+      "sql": "SELECT AVG(price) FROM products WHERE category = 'Electronics'"
+    },
+    {
+      "sql": "WITH ranked_sales AS (\n  SELECT product_id, sales_amount,\n         ROW_NUMBER() OVER (PARTITION BY category ORDER BY sales_amount DESC) AS rank\n  FROM sales\n)\nSELECT product_id, sales_amount\nFROM ranked_sales\nWHERE rank <= 3\n"
+    },
+    {
+      "case": [
+        {
+          "age < 13": "Child"
+        },
+        {
+          "age < 20": "Teenager"
+        },
+        {
+          "age < 65": "Adult"
+        },
+        {
+          "true": "Senior"
+        }
+      ]
+    },
+    {
+      "case": [
+        {
+          "stock_quantity == 0": "Out of Stock"
+        },
+        {
+          "stock_quantity < reorder_point": "Low Stock"
+        },
+        {
+          "stock_quantity < 2 * reorder_point": "Moderate Stock"
+        },
+        {
+          "true": "Well Stocked"
+        }
+      ]
+    },
+    {
+      "case": [
+        {
+          "order_total > 1000 && is_repeat_customer": "VIP"
+        },
+        {
+          "order_total > 1000": "Big Spender"
+        },
+        {
+          "is_repeat_customer": "Loyal Customer"
+        },
+        {
+          "true": "New Customer"
+        }
+      ]
+    },
+    {
+      "case": [
+        {
+          "sentiment_score > 0.8": "Very Positive"
+        },
+        {
+          "sentiment_score > 0.6": "Positive"
+        },
+        {
+          "sentiment_score > 0.4": "Neutral"
+        },
+        {
+          "sentiment_score > 0.2": "Negative"
+        },
+        {
+          "true": "Very Negative"
+        }
+      ]
+    },
+    "(revenue - cost) / revenue * 100 > 20 && units_sold > 100",
+    "date.day_of_week(order_date) in [6, 7] || date.is_holiday(order_date)",
+    "json.extract_path_text(user_data, 'preferences', 'theme') == 'dark'",
+    "date.add_months(subscription_start, 12) > current_date() && is_active",
+    "array_length(regexp_split_to_array(trim(description), '\\s+')) between 50..100"
+  ]
+}

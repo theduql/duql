@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://example.com/metadata.s.duql.yml
+$id: settings.s.duql.json
 title: DUQL Query Settings
 description: Metadata and configuration options for DUQL queries
 type: object

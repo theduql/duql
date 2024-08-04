@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "take.s.duql.json",
+  "title": "DUQL Take Function",
+  "description": "The take function in DUQL is used to limit the number of rows returned or to select\nspecific ranges of rows. It can be used for pagination, sampling, or selecting top/bottom N rows.\n",
+  "type": "object",
+  "properties": {
+    "take": {
+      "title": "Take Operation",
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Specifies the number of rows to take from the beginning of the dataset.\nExample: 10 (take the first 10 rows)\nGotcha: Taking 0 rows can be useful for schema inspection but returns no data.\n"
+        },
+        {
+          "type": "string",
+          "pattern": "^(\\d+\\.\\.(\\d+)?|\\.\\.\\d+)$",
+          "description": "Specifies a range of rows to take.\nExamples:\n- '5..10': Take rows 5 through 10\n- '100..': Take all rows starting from row 100\n- '..50': Take the first 50 rows (equivalent to take: 50)\nGotcha: Row numbers are 1-indexed, not 0-indexed.\n"
+        }
+      ],
+      "description": "Specifies the number of rows to take or a range of rows.\nCan be a positive integer or a range in the form of 'start..end', 'start..', or '..end'.\nGotcha: The take operation is typically applied after sorting, which can affect which rows are selected.\n"
+    }
+  },
+  "required": [
+    "take"
+  ],
+  "examples": [
+    {
+      "take": 10
+    },
+    {
+      "take": 0
+    },
+    {
+      "take": "5..10"
+    },
+    {
+      "take": "100.."
+    },
+    {
+      "take": "..50"
+    },
+    {
+      "take": 1
+    },
+    {
+      "take": "10..20"
+    },
+    {
+      "take": "..100"
+    },
+    {
+      "take": "1000.."
+    },
+    {
+      "take": "5..15"
+    }
+  ]
+}

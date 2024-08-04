@@ -126,6 +126,60 @@
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .github-button {
+            /* ... (previous styles remain unchanged) ... */
+        }
+
+        .docs-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            background-color: var(--secondary);
+            color: var(--background);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(26, 43, 60, 0.1);
+            border: 2px solid var(--secondary);
+        }
+
+        .docs-button:hover {
+            background-color: var(--background);
+            color: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 165, 165, 0.4);
+        }
+
+        .docs-button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 165, 165, 0.4);
+        }
+
+        .docs-button::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23F5F5F5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5V8H7.5V3.5h5.5zM14 20H7.5v-4H14v4zm2-4v4h-1v-4h1zm-2-2H7.5v-4H14v4zm2-4h-1v4h1v-4zm-2-2H7.5V7H14v3zm2-3h-1v3h1V7z"/></svg>') no-repeat center;
+            background-size: contain;
+            transition: all 0.2s ease;
+        }
+
+        .docs-button:hover::before {
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300A5A5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5V8H7.5V3.5h5.5zM14 20H7.5v-4H14v4zm2-4v4h-1v-4h1zm-2-2H7.5v-4H14v4zm2-4h-1v4h1v-4zm-2-2H7.5V7H14v3zm2-3h-1v3h1V7z"/></svg>') no-repeat center;
+            background-size: contain;
+        }
     </style>
 </head>
 <body>
@@ -136,7 +190,10 @@
         </div>
         <h1>DUQL</h1>
         <h2>DANGEROUSLY USABLE QUERY LANGUAGE</h2>
-        <a href="https://github.com/assembledstudio/duql" class="github-button">View on GitHub</a>
+        <div class="button-container">
+            <a href="https://github.com/theduql/duql" class="github-button">View on GitHub</a>
+            <a href="https://docs.duql.dev" class="docs-button">Documentation</a>
+        </div>
     </div>
 
     <script>

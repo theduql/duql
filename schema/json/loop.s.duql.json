@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loop.s.duql.json",
+  "title": "DUQL Loop Function",
+  "description": "The loop function in DUQL is used for iterative processing. It applies a sequence of steps \nrepeatedly to an initial dataset until a termination condition is met, typically when the \nstep function returns an empty table.\nIMPORTANT: This feature is experimental and may be subject to changes in future versions.\n",
+  "type": "object",
+  "properties": {
+    "loop": {
+      "title": "Loop Operation",
+      "$ref": "steps.s.duql.json#/properties/steps",
+      "description": "An array of steps to be applied iteratively. The loop continues until one of the steps \nproduces an empty result set.\nGotcha: Ensure that your loop has a termination condition to avoid infinite loops.\n"
+    }
+  },
+  "required": [
+    "loop"
+  ],
+  "examples": [
+    {
+      "loop": [
+        {
+          "filter": "remaining_balance > 0"
+        },
+        {
+          "generate": {
+            "remaining_balance": "remaining_balance - payment_amount"
+          }
+        },
+        {
+          "append": "payments_made"
+        }
+      ]
+    },
+    {
+      "loop": [
+        {
+          "join": {
+            "dataset": "employees",
+            "where": "managers.id == employees.manager_id"
+          }
+        },
+        {
+          "generate": {
+            "level": "level + 1"
+          }
+        },
+        {
+          "filter": "not is_null(manager_id)"
+        }
+      ]
+    },
+    {
+      "loop": [
+        {
+          "filter": "convergence_delta > 0.001"
+        },
+        {
+          "generate": {
+            "new_value": "(value + target / value) / 2",
+            "convergence_delta": "abs(new_value - value)",
+            "value": "new_value"
+          }
+        },
+        {
+          "take": 1000
+        }
+      ]
+    },
+    {
+      "loop": [
+        {
+          "filter": "unprocessed_items > 0"
+        },
+        {
+          "generate": {
+            "batch": "take(items, 100)",
+            "processed_items": "processed_items + process_batch(batch)",
+            "unprocessed_items": "unprocessed_items - 100"
+          }
+        },
+        {
+          "append": "processed_batches"
+        }
+      ]
+    }
+  ]
+}

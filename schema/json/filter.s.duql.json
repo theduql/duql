@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "filter.s.duql.json",
+  "title": "DUQL Filter Function",
+  "description": "The filter function in DUQL is used to select rows from a dataset based on specified conditions.\nIt supports various comparison operators, logical operators, and complex expressions.\nMultiple filter conditions can be combined using logical operators.\n",
+  "type": "object",
+  "properties": {
+    "filter": {
+      "$ref": "expression.s.duql.json"
+    }
+  },
+  "required": [
+    "filter"
+  ],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "filter": "age > 18"
+    },
+    {
+      "filter": "created_at >= @2023-01-01"
+    },
+    {
+      "filter": "(lower(name) | like '%smith%') && age >= 21"
+    },
+    {
+      "filter": "order_date > current_date() - interval '30 days'"
+    },
+    {
+      "filter": "array_contains(tags, 'urgent') && status != 'completed'"
+    },
+    {
+      "filter": {
+        "sql": "SELECT * FROM logs"
+      }
+    },
+    {
+      "filter": "(created_at | in @1776-07-04..@1787-09-17)"
+    },
+    {
+      "filter": "(magnitude | in 50..100)"
+    },
+    {
+      "filter": "(lower(name) | like '%smith%') && age >= 21"
+    },
+    {
+      "filter": "order_date > current_date() - interval '30 days'"
+    },
+    {
+      "filter": "id == $1"
+    },
+    {
+      "filter": "array_contains(tags, 'urgent') && status != 'completed'"
+    }
+  ]
+}

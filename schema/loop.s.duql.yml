@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://duql.dev/schema/loop.s.duql.yml
+$id: loop.s.duql.json
 title: DUQL Loop Function
 description: |
   The loop function in DUQL is used for iterative processing. It applies a sequence of steps 
@@ -10,24 +10,7 @@ type: object
 properties:
   loop:
     title: Loop Operation
-    type: array
-    items:
-      oneOf:
-        - $ref: 'filter.s.duql.yml'
-        - $ref: 'generate.s.duql.yml'
-        - $ref: 'group.s.duql.yml'
-        - $ref: 'join.s.duql.yml'
-        - $ref: 'select.s.duql.yml'
-        - $ref: 'sort.s.duql.yml'
-        - $ref: 'take.s.duql.yml'
-        - $ref: 'window.s.duql.yml'
-        - $ref: 'append.s.duql.yml'
-        - $ref: 'remove.s.duql.yml'
-        - $ref: 'intersect.s.duql.yml'
-        - $ref: 'distinct.s.duql.yml'
-        - $ref: 'union.s.duql.yml'
-        - $ref: 'except.s.duql.yml'
-        - $ref: 'loop.s.duql.yml'
+    $ref: 'steps.s.duql.json#/properties/steps'
     description: |
       An array of steps to be applied iteratively. The loop continues until one of the steps 
       produces an empty result set.

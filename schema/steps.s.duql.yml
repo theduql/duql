@@ -1,78 +1,61 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://example.com/steps.s.duql.yml
-title: DUQL Steps
+$id: steps.s.duql.json
+title: DUQL Steps Pipeline
 description: |
   Defines the sequence of operations to be performed on the data in a DUQL query.
   Each step represents a transformation or action applied to the dataset.
   Steps are executed in the order they appear in the array.
-type: array
-items:
-  title: Step
-  type: object
-  oneOf:
-    - $ref: 'filter.s.duql.yml'
-    - $ref: 'generate.s.duql.yml'
-    - $ref: 'group.s.duql.yml'
-    - $ref: 'join.s.duql.yml'
-    - $ref: 'select.s.duql.yml'
-    - $ref: 'sort.s.duql.yml'
-    - $ref: 'take.s.duql.yml'
-    - $ref: 'window.s.duql.yml'
-    - $ref: 'append.s.duql.yml'
-    - $ref: 'remove.s.duql.yml'
-    - $ref: 'intersect.s.duql.yml'
-    - $ref: 'distinct.s.duql.yml'
-    - $ref: 'union.s.duql.yml'
-    - $ref: 'except.s.duql.yml'
-    - $ref: 'loop.s.duql.yml'
-  description: |
-    A single step in the DUQL query pipeline. Each step can be one of the following operations:
-    - filter: Select rows based on conditions
-    - generate: Create new columns or modify existing ones
-    - group: Aggregate data
-    - join: Combine data from multiple sources
-    - select: Choose or compute columns
-    - sort: Order results
-    - take: Limit the number of rows
-    - window: Perform window functions
-    - append: Combine datasets by adding rows
-    - remove: Exclude specific rows or subsets
-    - intersect: Find common rows between datasets
-    - distinct: Remove duplicate rows
-    - union: Combine datasets, removing duplicates
-    - except: Find rows in one dataset but not in another
-    - loop: Perform iterative processing
-    Gotcha: The order of steps can significantly affect the query results and performance.
-minItems: 1
+type: object
+properties:
+  steps:
+    type: array
+    items:
+      title: Pipeline Step
+      type: object
+      oneOf:
+        - $ref: 'filter.s.duql.json'
+        - $ref: 'generate.s.duql.json'
+        - $ref: 'group.s.duql.json'
+        - $ref: 'join.s.duql.json'
+        - $ref: 'select.s.duql.json'
+        - $ref: 'sort.s.duql.json'
+        - $ref: 'take.s.duql.json'
+        - $ref: 'window.s.duql.json'
+        - $ref: 'loop.s.duql.json'
+      description: |
+        A single step in the DUQL query pipeline. Each step can be one of the following operations in any order:
+        - filter: Select rows based on conditions
+        - generate: Create new columns or modify existing ones
+        - group: Aggregate data
+        - join: Combine data from multiple sources
+        - select: Choose or compute columns
+        - sort: Order results
+        - take: Limit the number of rows
+        - window: Perform window functions
+        - append: Combine datasets by adding rows
+        - remove: Exclude specific rows or subsets
+        - intersect: Find common rows between datasets
+        - distinct: Remove duplicate rows
+        - union: Combine datasets, removing duplicates
+        - except: Find rows in one dataset but not in another
+        - loop: Perform iterative processing
+        Gotcha: The order of steps can significantly affect the query results and performance.
+    minItems: 1
+required:
+  - steps
 
 examples:
-  - - filter: order_date >= @2023-01-01
-    - join:
-        dataset: customers
-        where: orders.customer_id == customers.id
-    - generate:
-        total_amount: price * quantity
-    - group:
-        by: [customer_id, customers.name]
-        summarize:
-          total_spent: sum(total_amount)
-          order_count: count(order_id)
-    - sort: -total_spent
-    - take: 10
-
-  - - select: [product_id, category, price]
-    - filter: price > 100
-    - distinct
-    - sort: [category, -price]
-
-  - - join:
-        dataset: sales
-        where: products.id == sales.product_id
-    - window:
-        rank:
-          function: rank
-          over:
-            partition: [category]
-            sort: -sales.quantity
-    - filter: rank <= 3
-    - sort: [category, rank]
+  steps:
+  - filter: order_date >= @2023-01-01
+  - join:
+      dataset: customers
+      where: orders.customer_id == customers.id
+  - generate:
+      total_amount: price * quantity
+  - group:
+      by: [customer_id, customers.name]
+      summarize:
+        total_spent: sum(total_amount)
+        order_count: count(order_id)
+  - sort: -total_spent
+  - take: 10

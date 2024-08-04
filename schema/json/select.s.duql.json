@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "select.s.duql.json",
+  "title": "DUQL Select Function",
+  "description": "The select function in DUQL is used to specify which columns to include in the output.\nIt can be used to choose existing columns, rename columns, compute new columns,\nor select all columns from a specific table. The select! variant is used to exclude specified columns.\nYou must use either 'select' to include specific columns or 'select!' to exclude specific columns.\nUsing both in the same operation is not allowed.\n",
+  "type": "object",
+  "properties": {
+    "select": {
+      "title": "Select Operation",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "maxProperties": 1
+              }
+            ]
+          },
+          "description": "List of column names to include in the output, optionally with computed columns.\nString items represent existing columns.\nObject items represent computed columns with a single key-value pair.\nExample: [\"id\", \"name\", {\"Total\": \"price * quantity\"}]\nGotcha: Order of items in the array determines the order in the output.\n"
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Object mapping new column names to expressions or existing column names.\nUse this for renaming columns or computing new columns.\nExample: {\"Full Name\": \"f\"{first_name} {last_name}\"\", \"Total\": \"price * quantity\"}\nGotcha: Complex expressions may impact query performance.\n"
+        }
+      ],
+      "description": "Specifies which columns to include in the output and how to compute or rename them.\nGotcha: Selecting unnecessary columns can impact query performance and result size.\n"
+    },
+    "select!": {
+      "title": "Exclude Columns",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of column names to exclude from the output. All other columns will be included.\nExample: [\"password\", \"credit_card_number\"]\nGotcha: Changes to the underlying schema may affect which columns are excluded.\n"
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "select"
+      ]
+    },
+    {
+      "required": [
+        "select!"
+      ]
+    }
+  ],
+  "examples": [
+    {
+      "select": [
+        "id",
+        "name",
+        "email"
+      ]
+    },
+    {
+      "select": {
+        "Customer ID": "customer_id",
+        "Full Name": "f\"{first_name} {last_name}\"",
+        "Total Spent": "sum(order_total)"
+      }
+    },
+    {
+      "select": "employees.*"
+    },
+    {
+      "select!": [
+        "password",
+        "credit_card_number"
+      ]
+    },
+    {
+      "select": [
+        "order_id",
+        "customer_name",
+        "order_date",
+        {
+          "Total": "price * quantity"
+        }
+      ]
+    },
+    {
+      "select": {
+        "BMI": "weight / (height / 100) ^ 2",
+        "Weight Status": {
+          "case": [
+            {
+              "BMI < 18.5": "Underweight"
+            },
+            {
+              "BMI < 25": "Normal"
+            },
+            {
+              "BMI < 30": "Overweight"
+            },
+            {
+              "true": "Obese"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "select": [
+        "products.*",
+        "inventory.quantity_on_hand"
+      ]
+    },
+    {
+      "select": [
+        {
+          "User ID": "id"
+        },
+        {
+          "Username": "username"
+        },
+        {
+          "Last Login": "sql\"DATE_FORMAT(last_login, '%Y-%m-%d %H:%i:%s')\""
+        }
+      ]
+    },
+    {
+      "select": [
+        "category",
+        "product_name",
+        {
+          "Sales": "sum(quantity * price)"
+        },
+        {
+          "% of Total Sales": "sql\"SUM(quantity * price) / SUM(SUM(quantity * price)) OVER () * 100\""
+        }
+      ]
+    },
+    {
+      "select!": [
+        "created_at",
+        "updated_at",
+        "deleted_at"
+      ]
+    }
+  ]
+}

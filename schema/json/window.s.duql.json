@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "window.s.duql.json",
+  "title": "DUQL Window Function",
+  "description": "The window function in DUQL is used for performing calculations across a set of rows \nthat are related to the current row. It allows for complex analytics and comparisons \nwithin specified ranges or groups of data.\n",
+  "type": "object",
+  "properties": {
+    "window": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "string",
+          "pattern": "^(-?\\d+\\.\\.(-?\\d+)?|\\.\\.-?\\d+|\\.\\.)$",
+          "description": "Specifies a range of rows relative to the current row position.\nExamples: \"0..2\", \"-2..0\", \"..0\", \"..\"\n"
+        },
+        "range": {
+          "type": "string",
+          "pattern": "^-?\\d+\\.\\.(-?\\d+)?$",
+          "description": "Specifies a range of values relative to the current row value.\nExample: \"-1000..1000\"\n"
+        },
+        "expanding": {
+          "type": "boolean",
+          "description": "When true, creates a cumulative window (alias for rows: ..0).\n"
+        },
+        "rolling": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Specifies a rolling window of n rows, including the current row.\n"
+        },
+        "steps": {
+          "$ref": "steps.s.duql.json"
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "rows"
+          ]
+        },
+        {
+          "required": [
+            "range"
+          ]
+        },
+        {
+          "required": [
+            "expanding"
+          ]
+        },
+        {
+          "required": [
+            "rolling"
+          ]
+        }
+      ],
+      "required": [
+        "steps"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "window"
+  ],
+  "examples": [
+    {
+      "window": {
+        "rows": "0..2",
+        "steps": [
+          {
+            "sort": [
+              "date",
+              "-amount"
+            ]
+          },
+          {
+            "select": [
+              {
+                "moving_average": "average amount"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "window": {
+        "expanding": true,
+        "steps": [
+          {
+            "generate": {
+              "cumulative_sum": "sum sales"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "window": {
+        "rolling": 7,
+        "steps": [
+          {
+            "generate": {
+              "weekly_average": "average daily_visitors"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "window": {
+        "range": "-1000..1000",
+        "steps": [
+          {
+            "sort": "price"
+          },
+          {
+            "select": {
+              "price_rank": "rank this"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "window": {
+        "rows": "..",
+        "steps": [
+          {
+            "generate": {
+              "percent_of_total": "amount / sum(amount) * 100"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

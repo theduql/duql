@@ -224,7 +224,7 @@ steps:
     - summarize:
         call_count: count(distinct traces.trace_id)
         avg_duration: avg(child_spans.duration)
-        error_rate: 
+        error_rate: |
           sum(case when child_spans.status == 'ERROR' then 1 else 0 end) 
           / count(child_spans.span_id) 
           * 100
