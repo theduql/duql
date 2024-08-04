@@ -42,10 +42,15 @@
 
 ## Install
 ### macOS
-
+Install via Brew:
+```
+brew tap theduql/duql
+brew isntall duql
+```
 
 ### Linux
-bash`curl -fsSL https://raw.githubusercontent.com/theduql/duql/main/install.sh | sh`
+Run the following command in your terminal: 
+`curl -fsSL https://raw.githubusercontent.com/theduql/duql/main/install.sh | sh`
 
 ## Writing / Editing
 > [!NOTE]  
