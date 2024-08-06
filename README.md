@@ -19,12 +19,12 @@
 ## Examples
 ### DUQL vs. SQL
 #### DUQL
-![basic-duql](https://tyler-mills-shared.s3.amazonaws.com/duql_0.png)
+![basic-duql](https://s3.amazonaws.com/duql.dev/duql_simple.png)
 #### SQL
 ![basic-duql-sql-comparison](https://tyler-mills-shared.s3.amazonaws.com/duql_1_sql.png)
 
 ### Advanced Query
-![duql-advanced](https://tyler-mills-shared.s3.amazonaws.com/Chalk+Screenshot.png)
+![duql-advanced](https://s3.amazonaws.com/duql.dev/duql_advanced.png)
 
 ## Why?
 - Balanced: 
